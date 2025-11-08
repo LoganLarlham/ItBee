@@ -1,23 +1,36 @@
 import json
+import sqlite3
 from pathlib import Path
 from typing import Iterable, Dict
 
 from ..typing import WordEntry
 from ..letters import mask_of, normalize_text
+from ..config import Settings
 
 
 class Lexicon:
     def __init__(self, db_path: Path | None = None):
-        # If no path provided, use bundled sample
+        # Prefer a sqlite DB in user data path if available
+        settings = Settings()
+        default_db = settings.data_path / "lexicon.sqlite"
+        if db_path is None and default_db.exists():
+            db_path = default_db
         if db_path is None:
+            # fallback to bundled sample
             here = Path(__file__).parent
             db_path = here / "data" / "lexicon_sample.jsonl"
+
         self._path = Path(db_path)
+        self._use_sqlite = self._path.suffix == ".sqlite" and self._path.exists()
         self._entries = []  # type: list[WordEntry]
         self._by_required: Dict[str, list[WordEntry]] = {}
-        self._load()
+        self._conn = None
+        if self._use_sqlite:
+            self._conn = sqlite3.connect(str(self._path))
+        else:
+            self._load_jsonl()
 
-    def _load(self):
+    def _load_jsonl(self):
         if not self._path.exists():
             return
         with self._path.open("r", encoding="utf8") as fh:
@@ -45,7 +58,23 @@ class Lexicon:
                     self._by_required.setdefault(ch, []).append(entry)
 
     def iter_all(self) -> Iterable[WordEntry]:
-        yield from self._entries
+        if self._use_sqlite and self._conn is not None:
+            cur = self._conn.cursor()
+            for row in cur.execute("SELECT clean_form, zipf, mask FROM words"):
+                yield {"text": row[0], "zipf": float(row[1]), "mask": int(row[2])}
+        else:
+            yield from self._entries
 
     def iter_by_required(self, letter: str) -> Iterable[WordEntry]:
-        yield from self._by_required.get(letter.lower(), [])
+        l = letter.lower()
+        if self._use_sqlite and self._conn is not None:
+            bit = 0
+            # compute bit for letter
+            if len(l) == 1 and 'a' <= l <= 'z':
+                bit = 1 << (ord(l) - ord('a'))
+            cur = self._conn.cursor()
+            # mask & bit != 0
+            for row in cur.execute("SELECT clean_form, zipf, mask FROM words WHERE (mask & ?) != 0", (bit,)):
+                yield {"text": row[0], "zipf": float(row[1]), "mask": int(row[2])}
+        else:
+            yield from self._by_required.get(l, [])
