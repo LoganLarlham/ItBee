@@ -41,6 +41,9 @@ Create words using the given letters. Each word must:
 - Only use the given letters
 - Letters can be used multiple times
 
+Accented letters: input is normalized by removing diacritics (e.g. "è" -> "e").
+So enter words without accents or they'll be treated as their base letters.
+
 Commands during play:
   help     - Show this help message
   shuffle  - Shuffle the outer letters
