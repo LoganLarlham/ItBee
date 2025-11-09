@@ -8,10 +8,9 @@ Run the CLI:
 python -m it_spelling_bee.cli --seed 1234
 ```
 
-Useful flags:
+Useful flags / commands:
 
-- `--printseed`  Print the generated board seed (decimal and hex). Useful for reproducing a board
-	later with `--seed <value>`.
+- `printseed` (in-game command) — Print the current game's seed (decimal and hex). Useful for reproducing a board later with `python -m it_spelling_bee.cli --seed <value>`.
 
 Building the full offline lexicon (recommended):
 

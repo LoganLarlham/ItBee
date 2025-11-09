@@ -47,10 +47,8 @@ Commands during play:
   list     - Show found words
   score    - Show current score
   giveup   - Show all possible words
-  quit     - Exit the game
-  
-Flags (run-time):
-    --printseed  - Print the generated board seed (decimal and hex) when starting the program
+    quit     - Exit the game
+    printseed - Print the current game's seed (decimal and hex)
 """)
 
 def show_rules():
@@ -80,7 +78,6 @@ def run(argv=None):
     parser.add_argument("--solution", action="store_true", help="show all possible words and exit")
     parser.add_argument("--new", action="store_true", help="force new board generation")
     parser.add_argument("--dumpboard", action="store_true", help="print board data in JSON format")
-    parser.add_argument("--printseed", action="store_true", help="display the current board's seed")
     
     args = parser.parse_args(argv)
     
@@ -104,10 +101,6 @@ def run(argv=None):
         print(engine.dump_board())
         return
         
-    if args.printseed:
-        print(f"Board seed: {settings.seed} (0x{settings.seed:X})")
-        return
-        
     if args.solution:
         words = sorted([(len(w.text), w.text, board.scores[w.text]) for w in board.words])
         current_len = 0
@@ -121,7 +114,7 @@ def run(argv=None):
         return
 
     # Show intro text before starting
-    if not (args.hint or args.solution or args.dumpboard or args.printseed):
+    if not (args.hint or args.solution or args.dumpboard):
         show_intro()
 
     required = board.letters.required
@@ -145,6 +138,10 @@ def run(argv=None):
             continue
         if text == "help":
             print("Commands: help, shuffle, list, score, giveup, quit")
+            continue
+        if text == "printseed":
+            # print the current board's seed (decimal and hex)
+            print(f"Board seed: {settings.seed} (0x{settings.seed:X})")
             continue
         if text == "hint":
             hint = engine.get_hint()
