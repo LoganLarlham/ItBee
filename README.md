@@ -23,8 +23,15 @@ python -m pip install -r requirements.txt
 2. Build the SQLite lexicon (this will download wordfreq data the first time):
 
 ```bash
-python -m it_spelling_bee.lexicon.build --out ~/.it_spelling_bee/lexicon.sqlite --limit 200000
+# Required: point to an Italian hunspell .dic file via --dict or the ITBEE_DICT env var
+python -m it_spelling_bee.lexicon.build --dict /path/to/it_IT.dic --out ~/.it_spelling_bee/lexicon.sqlite --limit 200000
 ```
+
+Optional args:
+- `--whitelist path/to/whitelist.txt` to force-include specific tokens
+- `--blacklist path/to/blacklist.txt` to force-exclude specific tokens
+
+You can also set environment variables as fallbacks: `ITBEE_DICT`, `ITBEE_WHITELIST`, `ITBEE_BLACKLIST`.
 
 3. The program will automatically use `~/.it_spelling_bee/lexicon.sqlite` if present.
 

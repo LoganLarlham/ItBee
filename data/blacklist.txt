@@ -1,0 +1,4 @@
+# Example blacklist: exclude names, brands, foreign tokens
+facebook
+google
+microsoft
