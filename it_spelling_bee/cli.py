@@ -48,6 +48,9 @@ Commands during play:
   score    - Show current score
   giveup   - Show all possible words
   quit     - Exit the game
+  
+Flags (run-time):
+    --printseed  - Print the generated board seed (decimal and hex) when starting the program
 """)
 
 def show_rules():

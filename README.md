@@ -8,6 +8,11 @@ Run the CLI:
 python -m it_spelling_bee.cli --seed 1234
 ```
 
+Useful flags:
+
+- `--printseed`  Print the generated board seed (decimal and hex). Useful for reproducing a board
+	later with `--seed <value>`.
+
 Building the full offline lexicon (recommended):
 
 1. Install requirements (preferably in a virtualenv):
