@@ -3,7 +3,7 @@ import random
 import unicodedata
 
 ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-LETTER_TO_BIT = {ch: 1 << i for i, ch in enumerate(ALPHABET)}
+LETTER_TO_BIT = {ch: 1 << (ord(ch) - ord('a')) for ch in ALPHABET}
 
 
 def normalize_text(s: str) -> str:
@@ -14,9 +14,13 @@ def normalize_text(s: str) -> str:
 
 
 def mask_of(text: str) -> int:
+    """Convert text to a bitmask where each letter sets its corresponding bit.
+    Only counts each letter once and normalizes text first."""
     text = normalize_text(text)
+    # Only use the first occurrence of each letter, sorted for consistency
+    unique_letters = sorted(set(text))
     m = 0
-    for ch in text:
+    for ch in unique_letters:
         if ch in LETTER_TO_BIT:
             m |= LETTER_TO_BIT[ch]
     return m

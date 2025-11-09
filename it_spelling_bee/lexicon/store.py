@@ -50,7 +50,7 @@ class Lexicon:
                 mask = int(obj.get("mask", 0))
                 if mask == 0:
                     mask = mask_of(text)
-                entry: WordEntry = {"text": text, "zipf": zipf, "mask": mask}
+                entry = WordEntry(text=text, zipf=zipf, mask=mask)
                 self._entries.append(entry)
                 # index by each unique letter in the word
                 used = set(text)
@@ -61,7 +61,7 @@ class Lexicon:
         if self._use_sqlite and self._conn is not None:
             cur = self._conn.cursor()
             for row in cur.execute("SELECT clean_form, zipf, mask FROM words"):
-                yield {"text": row[0], "zipf": float(row[1]), "mask": int(row[2])}
+                yield WordEntry(text=row[0], zipf=float(row[1]), mask=int(row[2]))
         else:
             yield from self._entries
 
@@ -75,6 +75,6 @@ class Lexicon:
             cur = self._conn.cursor()
             # mask & bit != 0
             for row in cur.execute("SELECT clean_form, zipf, mask FROM words WHERE (mask & ?) != 0", (bit,)):
-                yield {"text": row[0], "zipf": float(row[1]), "mask": int(row[2])}
+                yield WordEntry(text=row[0], zipf=float(row[1]), mask=int(row[2]))
         else:
             yield from self._by_required.get(l, [])

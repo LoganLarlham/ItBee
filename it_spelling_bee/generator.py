@@ -27,25 +27,35 @@ def generate_board(lex: Lexicon, settings: Settings, rng: random.Random) -> Gene
     while tries < 200:
         tries += 1
         required, others = _random_letters(rng)
-        letters: Letters = {"required": required, "others": tuple(others)}
+        letters = Letters(required=required, others=tuple(others))
         board_mask = 0
         for ch in (required, *others):
             board_mask |= LETTER_TO_BIT[ch]
-        board = {"letters": letters, "mask": board_mask}
-        # candidate words: those containing required
+        # Create a board instance for validation
+        # Create initial board for validating words
+        temp_board = GeneratedBoard(
+            letters=letters,
+            words=[],  # Will be populated as we find valid words
+            scores={},
+            total_points=0,
+            threshold=0,
+            mask=board_mask
+        )
+        # Get candidates containing required letter
         candidates = list(lex.iter_by_required(required))
         valid = []
         scores = {}
         total = 0
         for entry in candidates:
-            if is_valid(entry, board, rules, required):
-                sc = score_word(entry, board, settings)
+            # Validate with temp board
+            if is_valid(entry, temp_board, rules, required):
+                sc = score_word(entry, temp_board, settings)
                 valid.append(entry)
-                scores[entry["text"]] = sc
+                scores[entry.text] = sc
                 total += sc
         if settings.min_valid_words <= len(valid) <= settings.max_valid_words and settings.min_total_points <= total <= settings.max_total_points:
             threshold = int((total * settings.win_fraction) + 0.9999)
-            return {"letters": letters, "words": valid, "scores": scores, "total_points": total, "threshold": threshold, "mask": board_mask}
+            return GeneratedBoard(letters=letters, words=list(valid), scores=scores, total_points=total, threshold=threshold, mask=board_mask)
     # fallback: return whatever we have from last attempt
     threshold = int((total * settings.win_fraction) + 0.9999)
-    return {"letters": letters, "words": valid, "scores": scores, "total_points": total, "threshold": threshold, "mask": board_mask}
+    return GeneratedBoard(letters=letters, words=list(valid), scores=scores, total_points=total, threshold=threshold, mask=board_mask)
