@@ -27,7 +27,7 @@ def show_intro():
                         _ _ _               _               
                        | | (_)             | |              
          ___ _ __   ___| | |_ _ __   __ _  | |__   ___  ___ 
-        / __| '_ \ / _ \ | | | '_ \ / _` | | '_ \ / _ \/ _ \
+        / __| '_ \ / _ \ | | | '_ \ / _` | | '_ \ / _ \/ _ \\
         \__ \ |_) |  __/ | | | | | | (_| | | |_) |  __/  __/
         |___/ .__/ \___|_|_|_|_| |_|\__, | |_.__/ \___|\___|
             | |                      __/ |                  
@@ -86,8 +86,12 @@ def run(argv=None):
         return
 
     settings = Settings()
+    # If user provided a seed use it; otherwise generate a stable seed value
     if args.seed is not None:
         settings.seed = args.seed
+    if settings.seed is None:
+        # create a random 32-bit seed and store it so --printseed can display it
+        settings.seed = random.getrandbits(32)
     rng = random.Random(settings.seed)
     lex = Lexicon()
     board = generate_board(lex, settings, rng)
