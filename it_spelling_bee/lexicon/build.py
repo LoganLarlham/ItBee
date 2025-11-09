@@ -163,11 +163,19 @@ def build(out_path: Path, dict_path: Optional[Path], whitelist_path: Optional[Pa
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Build Italian lexicon by intersecting wordfreq with a Hunspell dictionary and overrides")
     parser.add_argument("--out", type=Path, default=Path.home() / ".it_spelling_bee" / "lexicon.sqlite")
     parser.add_argument("--limit", type=int, default=200000)
+    parser.add_argument("--dict", type=Path, default=None, help="Path to Hunspell .dic file (or set ITBEE_DICT env var)")
+    parser.add_argument("--whitelist", type=Path, default=None, help="Optional whitelist file (one word per line)")
+    parser.add_argument("--blacklist", type=Path, default=None, help="Optional blacklist file (one word per line)")
     args = parser.parse_args(argv)
-    build(args.out, args.limit)
+
+    dict_path = args.dict or (Path(os.environ.get("ITBEE_DICT")) if os.environ.get("ITBEE_DICT") else None)
+    whitelist_path = args.whitelist or (Path(os.environ.get("ITBEE_WHITELIST")) if os.environ.get("ITBEE_WHITELIST") else None)
+    blacklist_path = args.blacklist or (Path(os.environ.get("ITBEE_BLACKLIST")) if os.environ.get("ITBEE_BLACKLIST") else None)
+
+    build(args.out, dict_path, whitelist_path, blacklist_path, args.limit)
 
 
 if __name__ == "__main__":
