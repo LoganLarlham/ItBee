@@ -4,6 +4,7 @@ import random
 from typing import Set, Tuple, Dict, Any, Optional
 
 from .typing import GeneratedBoard
+from .letters import normalize_text
 
 
 @dataclass
@@ -18,15 +19,40 @@ class Engine:
         self.state = GameState(board=board)
 
     def guess(self, word: str) -> Tuple[bool, str | None, int | None]:
-        w = word.lower()
-        if w in self.state.found:
+        """Process a guess and return (ok, message, points).
+
+        Messages:
+          - 'duplicate' when word already found
+          - 'missing required letter' when required letter not present
+          - 'contains invalid letter' when guess uses letters outside the board
+          - 'not in solution' when guess passes above checks but isn't a valid word
+        """
+        text = normalize_text(word)
+        if text in self.state.found:
             return False, "duplicate", None
+
         # access board via dataclass attribute
         board = self.state.board
-        if w not in board.scores:
+
+        # prepare allowed letters set
+        required = board.letters.required.lower()
+        allowed = {required} | {c.lower() for c in board.letters.others}
+
+        # check required letter
+        if required not in text:
+            return False, "missing required letter", None
+
+        # check allowed letters
+        for ch in text:
+            if ch not in allowed:
+                return False, "contains invalid letter", None
+
+        # finally, check if the word is in the board's valid words
+        if text not in board.scores:
             return False, "not in solution", None
-        points = board.scores[w]
-        self.state.found.add(w)
+
+        points = board.scores[text]
+        self.state.found.add(text)
         self.state.score += points
         return True, "ok", points
 
