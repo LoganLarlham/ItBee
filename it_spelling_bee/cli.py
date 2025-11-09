@@ -137,7 +137,7 @@ def run(argv=None):
         if not text:
             continue
         if text == "help":
-            print("Commands: help, shuffle, list, score, giveup, quit")
+            print("Commands: help, shuffle, hint, list, score, giveup, printseed, quit")
             continue
         if text == "printseed":
             # print the current board's seed (decimal and hex)
