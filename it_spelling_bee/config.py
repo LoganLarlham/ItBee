@@ -14,5 +14,7 @@ class Settings:
     max_total_points: int = 1200
     win_fraction: float = 0.75
     allow_rare_letters: bool = False
+    hint_cost: int = 2
+    use_colors: bool = True
     seed: Optional[int] = None
     data_path: Path = Path("~/.it_spelling_bee").expanduser()

@@ -65,16 +65,29 @@ class Lexicon:
         else:
             yield from self._entries
 
+
     def iter_by_required(self, letter: str) -> Iterable[WordEntry]:
         l = letter.lower()
+        # Check cache first
+        if l in self._by_required:
+            yield from self._by_required[l]
+            return
+
         if self._use_sqlite and self._conn is not None:
             bit = 0
             # compute bit for letter
             if len(l) == 1 and 'a' <= l <= 'z':
                 bit = 1 << (ord(l) - ord('a'))
+            
+            entries = []
             cur = self._conn.cursor()
             # mask & bit != 0
             for row in cur.execute("SELECT clean_form, zipf, mask FROM words WHERE (mask & ?) != 0", (bit,)):
-                yield WordEntry(text=row[0], zipf=float(row[1]), mask=int(row[2]))
+                entry = WordEntry(text=row[0], zipf=float(row[1]), mask=int(row[2]))
+                entries.append(entry)
+            
+            # Cache the result
+            self._by_required[l] = entries
+            yield from entries
         else:
             yield from self._by_required.get(l, [])

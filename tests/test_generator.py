@@ -1,6 +1,6 @@
 import random
 import pytest
-from it_spelling_bee.generator import generate_board, _random_letters
+from it_spelling_bee.generator import generate_board, WeightedLetterSampler
 from it_spelling_bee.config import Settings
 from it_spelling_bee.lexicon.store import Lexicon
 from it_spelling_bee.letters import mask_of
@@ -18,22 +18,32 @@ class MockLexicon(Lexicon):
                     w = f"{v}{c1}{v}{c2}"
                     words.append(WordEntry(text=w, zipf=4.0, mask=mask_of(w)))
         self._entries = words
+        self._by_required = {}
+        for w in words:
+            for ch in set(w.text):
+                self._by_required.setdefault(ch, []).append(w)
 
     def iter_all(self):
         return iter(self._entries)
 
     def iter_by_required(self, letter):
         # Return words containing the required letter
-        return (e for e in self._entries if letter in e.text.lower())
+        return iter(self._by_required.get(letter, []))
 
-def test_random_letters():
+def test_weighted_sampler():
     rng = random.Random(42)
-    required, others = _random_letters(rng)
+    sampler = WeightedLetterSampler()
+    required, others = sampler.sample_set(rng)
     
     assert len(required) == 1
     assert len(others) == 6
     assert required not in others
     assert len(set(others)) == 6  # All distinct
+    
+    # Check constraints (at least 2 vowels, 3 consonants)
+    vowels = sum(1 for c in (required + "".join(others)) if c in "aeiou")
+    assert vowels >= 2
+    assert (7 - vowels) >= 3
 
 def test_generate_board_constraints():
     settings = Settings(
