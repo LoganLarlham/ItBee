@@ -7,7 +7,7 @@ from it_spelling_bee.typing import Letters, WordEntry, GeneratedBoard
 from it_spelling_bee.letters import mask_of
 
 def make_mock_board():
-    letters = Letters(required="a", others=("b", "c", "d", "e", "f", "g"))
+    letters = Letters(required="a", others=("b", "c", "d", "e", "f", "l"))
     board_mask = mask_of("abcdefg")
     words = [
         WordEntry(text="able", zipf=5.0, mask=mask_of("able")),
@@ -83,7 +83,8 @@ def test_cli_invalid_word(mock_generate):
     with patch("sys.stdin", input_stream), patch("sys.stdout", new_callable=StringIO) as output:
         run(["--seed", "42"])
         out = output.getvalue()
-        assert "not in solution" in out
+        # missing required letter should be reported explicitly
+        assert "missing required letter" in out
 
 def test_cli_duplicate_word(mock_generate):
     # Test submitting duplicate word

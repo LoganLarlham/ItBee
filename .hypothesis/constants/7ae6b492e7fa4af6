@@ -1,0 +1,4 @@
+# file: /Users/loganlarlham/Documents/ItBee/it_spelling_bee/cli.py
+# hypothesis_version: 6.148.2
+
+['\nGoodbye', '\x1b[0m', '\x1b[1m', '\x1b[91m', '\x1b[92m', '\x1b[93m', '\x1b[94m', '\x1b[96m', '--dumpboard', '--hint', '--min-valid-words', '--new', '--no-color', '--rules', '--seed', '--solution', '> ', 'All words:', 'Bye', 'Found:', 'Starting new game...', '__main__', 'duplicate', 'found', 'giveup', 'help', 'hint', 'itbee', 'list', 'printseed', 'quit', 'restart', 'score', 'seed', 'session.json', 'shuffle', 'store_true']

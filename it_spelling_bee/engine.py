@@ -64,13 +64,30 @@ class Engine:
     def is_won(self) -> bool:
         return self.state.score >= self.state.board.threshold
 
-    def get_hint(self) -> Optional[str]:
-        """Get a random unguessed word hint showing first 2 letters and length."""
+    def get_hint(self, cost: int = 0) -> Tuple[Optional[str], int]:
+        """Get a random unguessed word hint showing first 2 letters and length.
+        Returns (hint_string, points_deducted)
+        """
         unguessed = sorted([w.text for w in self.state.board.words if w.text not in self.state.found])
         if not unguessed:
-            return None
+            return None, 0
+        
+        # Deduct cost but don't go below 0 total score? 
+        # Plan says "point penalty". Usually implies score reduction.
+        deduction = 0
+        if self.state.score >= cost:
+            self.state.score -= cost
+            deduction = cost
+            
         word = random.choice(unguessed)
-        return f"Hint: {word[:2]}{'_' * (len(word) - 2)} ({len(word)} letters)"
+        return f"Hint: {word[:2]}{'_' * (len(word) - 2)} ({len(word)} letters)", deduction
+
+    def restore_state(self, data: Dict[str, Any]):
+        """Restore game state from a dictionary."""
+        if "found" in data:
+            self.state.found = set(data["found"])
+        if "score" in data:
+            self.state.score = int(data["score"])
 
     def get_board_data(self) -> Dict[str, Any]:
         """Get board data in JSON-friendly format."""

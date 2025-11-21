@@ -1,3 +1,5 @@
+# Ignore local large dictionary file
+it_spelling_bee/data/italian.dic
 __pycache__/
 *.pyc
 .venv/

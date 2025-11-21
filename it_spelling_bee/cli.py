@@ -1,16 +1,32 @@
 import argparse
 import random
 import sys
+from pathlib import Path
 
 from .config import Settings
 from .lexicon.store import Lexicon
 from .generator import generate_board
 from .engine import Engine
 from .letters import shuffle_letters
+from .persistence import load_session, save_session
 
+# ANSI Colors
+class Colors:
+    RESET = "\033[0m"
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    BOLD = "\033[1m"
 
-def show_intro():
-    print("""
+def colorize(text: str, color: str, enabled: bool) -> str:
+    if not enabled:
+        return text
+    return f"{color}{text}{Colors.RESET}"
+
+def show_intro(use_colors: bool):
+    title = """
                                                                                 
                                                                       
  __  __   ___                               .--.      ,.--.           
@@ -34,8 +50,9 @@ def show_intro():
             |_|                     |___/                   
  
 Italian Spelling Bee
-==================
-Create words using the given letters. Each word must:
+=================="""
+    print(colorize(title, Colors.CYAN, use_colors))
+    print("""Create words using the given letters. Each word must:
 - Be at least 4 letters long
 - Use the center letter (shown in [brackets])
 - Only use the given letters
@@ -49,9 +66,10 @@ Commands during play:
   shuffle  - Shuffle the outer letters
   list     - Show found words
   score    - Show current score
+  hint     - Get a hint (costs points!)
   giveup   - Show all possible words
-    quit     - Exit the game
-    printseed - Print the current game's seed (decimal and hex)
+  restart  - Start a new game
+  quit     - Exit the game
 """)
 
 def show_rules():
@@ -73,6 +91,9 @@ Scoring:
 Goal: Achieve 75% of total possible points
 """)
 
+def get_session_path(settings: Settings) -> Path:
+    return settings.data_path / "session.json"
+
 def run(argv=None):
     parser = argparse.ArgumentParser(prog="itbee", description="Italian Spelling Bee - A word puzzle game")
     parser.add_argument("--seed", type=int, default=None, help="use specific seed for board generation")
@@ -81,6 +102,8 @@ def run(argv=None):
     parser.add_argument("--solution", action="store_true", help="show all possible words and exit")
     parser.add_argument("--new", action="store_true", help="force new board generation")
     parser.add_argument("--dumpboard", action="store_true", help="print board data in JSON format")
+    parser.add_argument("--no-color", action="store_true", help="disable colored output")
+    parser.add_argument("--min-valid-words", type=int, help="Minimum number of valid words required")
     
     args = parser.parse_args(argv)
     
@@ -89,16 +112,36 @@ def run(argv=None):
         return
 
     settings = Settings()
+    if args.no_color:
+        settings.use_colors = False
+    if args.min_valid_words is not None:
+        settings.min_valid_words = args.min_valid_words
+
+    session_path = get_session_path(settings)
+    session_data = None
+    
+    # Load session if exists and not forcing new/seed
+    if not args.new and args.seed is None and session_path.exists():
+        session_data = load_session(session_path)
+        if session_data and "seed" in session_data:
+            settings.seed = session_data["seed"]
+            print(colorize("Resuming saved session...", Colors.YELLOW, settings.use_colors))
+
     # If user provided a seed use it; otherwise generate a stable seed value
     if args.seed is not None:
         settings.seed = args.seed
     if settings.seed is None:
         # create a random 32-bit seed and store it so --printseed can display it
         settings.seed = random.getrandbits(32)
+        
     rng = random.Random(settings.seed)
     lex = Lexicon()
     board = generate_board(lex, settings, rng)
     engine = Engine(board)
+
+    # Restore state if we loaded a session matching this seed
+    if session_data and session_data.get("seed") == settings.seed:
+        engine.restore_state(session_data)
 
     if args.dumpboard:
         print(engine.dump_board())
@@ -118,17 +161,26 @@ def run(argv=None):
 
     # Show intro text before starting
     if not (args.hint or args.solution or args.dumpboard):
-        show_intro()
+        show_intro(settings.use_colors)
 
     required = board.letters.required
     others = list(board.letters.others)
-    print(f"[{required.upper()}] ", " ".join(others))
-    print(f"Found 0/{len(board.words)}   Score 0 / {board.total_points}   Goal {board.threshold}")
+    
+    def print_status():
+        req_display = colorize(f"[{required.upper()}]", Colors.CYAN + Colors.BOLD, settings.use_colors)
+        others_display = " ".join(others)
+        print(f"{req_display}  {others_display}")
+        p = engine.progress()
+        print(f"Found {p['found']}/{len(board.words)}   Score {p['score']} / {board.total_points}   Goal {board.threshold}")
+
+    print_status()
 
     if args.hint:
-        hint = engine.get_hint()
+        hint, cost = engine.get_hint(settings.hint_cost)
         if hint:
-            print(hint)
+            print(colorize(hint, Colors.YELLOW, settings.use_colors))
+            if cost > 0:
+                print(colorize(f"(-{cost} points)", Colors.RED, settings.use_colors))
         return
 
     while True:
@@ -139,52 +191,89 @@ def run(argv=None):
             return
         if not text:
             continue
+        
         if text == "help":
-            print("Commands: help, shuffle, hint, list, score, giveup, printseed, quit")
+            print("Commands: help, shuffle, hint, list, score, giveup, restart, printseed, quit")
             continue
+            
         if text == "printseed":
-            # print the current board's seed (decimal and hex)
             print(f"Board seed: {settings.seed} (0x{settings.seed:X})")
             continue
+            
         if text == "hint":
-            hint = engine.get_hint()
+            hint, cost = engine.get_hint(settings.hint_cost)
             if hint:
-                print(hint)
+                print(colorize(hint, Colors.YELLOW, settings.use_colors))
+                if cost > 0:
+                    print(colorize(f"Hint penalty applied: -{cost} points", Colors.RED, settings.use_colors))
+                    # Save after score change
+                    save_session(session_path, {
+                        "seed": settings.seed,
+                        "found": list(engine.state.found),
+                        "score": engine.state.score
+                    })
             else:
                 print("No more words to find!")
             continue
+            
         if text == "shuffle":
             _, others = shuffle_letters(required, others, rng)
             others = list(others)
-            print(f"[{required.upper()}] ", " ".join(others))
+            print_status()
             continue
+            
         if text == "list":
             print("Found:")
             for w in sorted(engine.state.found):
-                print(w)
+                print(colorize(w, Colors.GREEN, settings.use_colors))
             continue
+            
         if text == "score":
-            p = engine.progress()
-            print(f"Found {p['found']}/{p['total_words']}   Score {p['score']} / {p['threshold']}")
+            print_status()
             continue
+            
+        if text == "restart":
+            print("Starting new game...")
+            if session_path.exists():
+                session_path.unlink()
+            # Re-exec with --new
+            # Or just return to main loop? Simpler to just exit and tell user to run again or wrap in a loop.
+            # Let's wrap in a loop or just re-exec.
+            # For now, let's just clear session and tell user to run again, or better:
+            # We can't easily re-init everything in this structure without refactoring `run` to be a loop.
+            # Let's just delete session and exit.
+            print("Session cleared. Run 'itbee' again to start a new board.")
+            return
+            
         if text == "giveup":
             print("All words:")
             for e in board.words:
-                print(e.text, board.scores.get(e.text, 0))
+                print(f"{e.text} ({board.scores.get(e.text, 0)})")
+            if session_path.exists():
+                session_path.unlink()
             return
+            
         if text == "quit":
             print("Bye")
             return
 
         ok, msg, pts = engine.guess(text)
         if ok:
-            print(f"+{pts} OK")
+            print(colorize(f"+{pts} OK", Colors.GREEN, settings.use_colors))
+            # Save session
+            save_session(session_path, {
+                "seed": settings.seed,
+                "found": list(engine.state.found),
+                "score": engine.state.score
+            })
         else:
-            print(msg)
+            if msg == "duplicate":
+                print(colorize(msg, Colors.YELLOW, settings.use_colors))
+            else:
+                print(colorize(msg, Colors.RED, settings.use_colors))
             
         # Update progress after each guess
-        p = engine.progress()
-        print(f"Found {p['found']}/{p['total_words']}   Score {p['score']} / {p['total_points']}   Goal {p['threshold']}")
+        print_status()
 
 
 if __name__ == "__main__":

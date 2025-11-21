@@ -68,10 +68,22 @@ def _parse_list(path: Optional[Path], min_len: int = 2) -> Set[str]:
 
 def build(out_path: Path, dict_path: Optional[Path], whitelist_path: Optional[Path], blacklist_path: Optional[Path], limit: int = 200000, min_len: int = 2):
     try:
-        from wordfreq import top_n_list, zipf_frequency, __version__ as wordfreq_version
+        from wordfreq import top_n_list, zipf_frequency
     except Exception:
         print("wordfreq is required. Install with: pip install wordfreq")
         raise
+
+    # try to get wordfreq version if importlib.metadata is available
+    wordfreq_version = ""
+    try:
+        try:
+            from importlib.metadata import version
+        except Exception:
+            from importlib_metadata import version  # type: ignore
+        wordfreq_version = version("wordfreq")
+    except Exception:
+        # fallback: leave empty
+        wordfreq_version = ""
 
     if dict_path is None:
         raise ValueError("--dict PATH is required (or set ITBEE_DICT environment variable)")

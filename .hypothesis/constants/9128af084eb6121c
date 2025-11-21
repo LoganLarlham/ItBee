@@ -1,0 +1,4 @@
+# file: /Users/loganlarlham/Documents/ItBee/it_spelling_bee/config.py
+# hypothesis_version: 6.148.2
+
+[0.75, 2.0, 200, 1200, '~/.it_spelling_bee']

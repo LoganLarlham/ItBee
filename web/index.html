@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ape Italiana - Italian Spelling Bee</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="modal.css">
+    <link rel="stylesheet" href="controls.css">
+    <link rel="stylesheet" href="loading.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen active">
+        <div class="loading-content">
+            <h1>🐝 Ape Italiana</h1>
+            <p class="loading-text" data-i18n="loading_lexicon">Loading word list...</p>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p class="loading-details"><span id="loading-bytes">0</span> KB / <span id="loading-total">586</span> KB</p>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <header>
+            <div class="header-content">
+                <button class="icon-btn" id="btn-help" data-i18n-title="how_to_play">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </button>
+                <h1 data-i18n="game_title">Ape Italiana</h1>
+                <button class="icon-btn" id="btn-settings" data-i18n-title="settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6"></path>
+                        <path d="M17 5v4M7 5v4M17 15v4M7 15v4"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="score-container">
+                <div class="rank" id="rank" data-i18n="rank_beginner">Principiante</div>
+                <div class="score-bar-bg">
+                    <div class="score-bar-fill" id="score-bar" style="width: 0%"></div>
+                </div>
+                <div class="score-text"><span id="score">0</span> <span data-i18n="points">punti</span></div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="honeycomb">
+                <div class="hex outer" data-letter="0"></div>
+                <div class="hex outer" data-letter="1"></div>
+                <div class="hex center" data-letter="center"></div>
+                <div class="hex outer" data-letter="2"></div>
+                <div class="hex outer" data-letter="3"></div>
+                <div class="hex outer" data-letter="4"></div>
+                <div class="hex outer" data-letter="5"></div>
+            </div>
+
+            <div class="input-area" id="input-text"></div>
+
+            <div class="message-area" id="message-area"></div>
+
+            <div class="actions">
+                <button class="action-btn" id="btn-delete" data-i18n="delete">Cancella</button>
+                <button class="action-btn" id="btn-shuffle" data-i18n="shuffle">Mischia</button>
+                 <button class="action-btn primary" id="btn-submit" data-i18n="enter">Invio</button>
+            </div>
+
+            <div class="seed-display"><span data-i18n="seed">Seed</span>: <span id="seed-display">-</span></div>
+
+            <div class="found-words">
+                <h3 data-i18n="found_words">Hai trovato <span id="found-count">0</span> parole</h3>
+                <div class="word-list" id="word-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="help-modal">×</button>
+            <h2 data-i18n="how_to_play">Come Si Gioca</h2>
+            <div class="modal-body">
+                <p data-i18n="help_text_1">Crea parole usando le lettere dell'alveare. Le parole devono contenere almeno 4 lettere e includere sempre la lettera centrale.</p>
+                <p data-i18n="help_text_2"><strong data-i18n="scoring">Punteggio:</strong></p>
+                <ul>
+                    <li data-i18n="help_4_letters">Parole di 4 lettere: 1 punto</li>
+                    <li data-i18n="help_longer">Parole più lunghe: 1 punto per lettera</li>
+                    <li data-i18n="help_pangram">Pangram (usa tutte e 7 le lettere): +7 punti bonus</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="settings-modal">×</button>
+            <h2 data-i18n="settings">Impostazioni</h2>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="dark-mode">
+                        <span data-i18n="dark_mode">Modalità Scura</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="sound-effects">
+                        <span data-i18n="sound_effects">Effetti Sonori</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label for="language-select" data-i18n="language">Lingua:</label>
+                    <select id="language-select" class="language-dropdown">
+                        <option value="it">Italiano 🇮🇹</option>
+                        <option value="en">English 🇬🇧</option>
+                    </select>
+                </div>
+                <hr>
+                <h3 data-i18n="game_controls">Controlli di Gioco</h3>
+                <div class="game-controls">
+                    <button id="btn-new-game" class="control-btn" data-i18n="new_game">Nuovo Gioco</button>
+                    <div class="seed-input-group">
+                        <input type="number" id="seed-input" placeholder="12345" min="1" max="999999">
+                        <button id="btn-seed-game" class="control-btn" data-i18n="use_seed">Usa Seed</button>
+                    </div>
+                    <button id="btn-show-words" class="control-btn debug-btn" data-i18n="show_all_words">📊 Mostra Tutte le Parole (Debug)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script src="lexicon-loader.js"></script>
+    <script src="generator.js"></script>
+    <script src="app.js"></script>
+    <script src="app-init.js"></script>
+</body>
+</html>

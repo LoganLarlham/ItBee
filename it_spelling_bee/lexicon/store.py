@@ -16,12 +16,17 @@ class Lexicon:
         if db_path is None and default_db.exists():
             db_path = default_db
         if db_path is None:
-            # fallback to bundled sample
-            here = Path(__file__).parent
-            db_path = here / "data" / "lexicon_sample.jsonl"
-
-        self._path = Path(db_path)
-        self._use_sqlite = self._path.suffix == ".sqlite" and self._path.exists()
+            # default to package data
+            base = Path(__file__).parent.parent / "data"
+            self.db_path = base / "lexicon.db"
+            if not self.db_path.exists():
+                 # fallback to bundled sample
+                 self.db_path = base / "lexicon_sample.jsonl"
+        else:
+            self.db_path = db_path
+            
+        self._path = self.db_path
+        self._use_sqlite = self.db_path.suffix == ".sqlite" and self.db_path.exists()
         self._entries = []  # type: list[WordEntry]
         self._by_required: Dict[str, list[WordEntry]] = {}
         self._conn = None

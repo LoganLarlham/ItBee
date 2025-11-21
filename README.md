@@ -2,37 +2,87 @@
 
 This is a minimal offline CLI implementation of the Italian Spelling Bee described in `ItBee_Plan.md`.
 
-Run the CLI:
+Overview
+--------
+
+This repository contains a small CLI game plus tools to build a local offline Italian lexicon. The core idea: generate a 7-letter board with a required center letter and score Italian words that use those letters.
+
+Project layout
+--------------
+
+- `it_spelling_bee/` - main package
+	- `cli.py` - command-line interface and REPL
+	- `engine.py` - game engine, state, guesses, progress
+	- `generator.py` - board generator (uses lexicon)
+	- `letters.py` - normalization, masks, shuffle helpers
+	- `lexicon/` - lexicon tooling
+		- `build.py` - build local SQLite lexicon from wordfreq + Hunspell + overrides
+		- `store.py` - small runtime lexicon store used by the generator
+	- `rules.py` - validation rules (length, required letter, allowed letters)
+	- `scoring.py` - scoring heuristics (zipf-based + length + pangram bonus)
+	- `typing.py` - dataclasses for board/word types
+	- `persistence.py` - (future) save/load game state
+- `data/` - small sample resources and example whitelist/blacklist (not authoritative)
+- `tests/` - pytest unit tests
+- `PROJECT_SUMMARY.md`, `ItBee_Plan.md`, `README.md` - docs and notes
+
+Quick start
+-----------
+
+1. Create and activate a virtualenv (recommended):
 
 ```bash
-python -m it_spelling_bee.cli --seed 1234
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-Useful flags / commands:
-
-- `printseed` (in-game command) — Print the current game's seed (decimal and hex). Useful for reproducing a board later with `python -m it_spelling_bee.cli --seed <value>`.
-
-Building the full offline lexicon (recommended):
-
-1. Install requirements (preferably in a virtualenv):
+2. Install requirements:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-2. Build the SQLite lexicon (this will download wordfreq data the first time):
+3. Build the full offline lexicon (recommended if you want a complete game):
 
 ```bash
-# Required: point to an Italian hunspell .dic file via --dict or the ITBEE_DICT env var
-python -m it_spelling_bee.lexicon.build --dict /path/to/it_IT.dic --out ~/.it_spelling_bee/lexicon.sqlite --limit 200000
+# Required: point at an Italian Hunspell .dic file (LibreOffice or wooorm mirror)
+python -m it_spelling_bee.lexicon.build \
+	--dict /path/to/it_IT.dic \
+	--whitelist data/whitelist.txt \
+	--blacklist data/blacklist.txt \
+	--out ~/.it_spelling_bee/lexicon.sqlite \
+	--limit 200000
 ```
 
-Optional args:
-- `--whitelist path/to/whitelist.txt` to force-include specific tokens
-- `--blacklist path/to/blacklist.txt` to force-exclude specific tokens
+Notes:
+- The builder intersects `wordfreq` tokens with an authoritative Hunspell `.dic` and applies blacklist/whitelist overrides. Precedence: blacklist > whitelist > dictionary.
+- If you don't want to build, the repo includes a tiny sample lexicon used for quick testing.
 
-You can also set environment variables as fallbacks: `ITBEE_DICT`, `ITBEE_WHITELIST`, `ITBEE_BLACKLIST`.
+4. Run the CLI:
 
-3. The program will automatically use `~/.it_spelling_bee/lexicon.sqlite` if present.
+```bash
+python -m it_spelling_bee.cli
+```
 
-The repository includes a tiny sample lexicon for quick testing; building the full lexicon produces a complete offline database used by the generator.
+CLI tips
+--------
+- In-game commands: `help`, `shuffle`, `hint`, `list`, `score`, `giveup`, `printseed`, `quit`.
+- `printseed` prints the current game's seed (decimal and hex) so you can reproduce the board with `--seed`.
+- Accented letters are normalized by stripping diacritics (e.g. `è` -> `e`). Enter words without accents or they will be treated as their base letters.
+
+Testing
+-------
+
+Run the unit test suite from the repository root (PYTHONPATH required if running from source):
+
+```bash
+PYTHONPATH=$(pwd) python -m pytest -q
+```
+
+Development notes
+-----------------
+- Hunspell `.dic` files are large and are ignored by `.gitignore` in this repo; keep authoritative dictionaries local and record their SHA256 in lexicon meta.
+- The lexicon builder does not expand `.aff` rules. If you need inflected word forms, either provide an expanded list or add common inflections to `data/whitelist.txt`.
+- The builder records provenance (paths + SHA256 + wordfreq limit/version + timestamp) in the SQLite `meta` table for reproducibility.
+
+If you want, I can add a short troubleshooting section or an example workflow for producing a reproducible board and sharing the seed with another player.

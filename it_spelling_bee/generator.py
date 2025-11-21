@@ -54,7 +54,7 @@ class WeightedLetterSampler:
                     if len(candidates) == 7:
                         break
             
-            letters = list(candidates)
+            letters = sorted(list(candidates))
             vowels = sum(1 for c in letters if c in VOWELS)
             consonants = 7 - vowels
             

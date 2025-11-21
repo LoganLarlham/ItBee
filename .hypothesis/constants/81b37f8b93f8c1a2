@@ -1,0 +1,4 @@
+# file: /Users/loganlarlham/Documents/ItBee/it_spelling_bee/lexicon/build.py
+# hypothesis_version: 6.148.2
+
+[0.0, 8192, 200000, '#', '--blacklist', '--dict', '--limit', '--out', '--whitelist', '.it_spelling_bee', '/', 'Build summary:', 'ITBEE_BLACKLIST', 'ITBEE_DICT', 'ITBEE_WHITELIST', '__main__', 'accepted_dictionary', 'accepted_whitelist', 'blacklist_entries', 'blacklist_path', 'blacklist_sha256', 'build_ts_utc', 'dict_entries', 'dict_path', 'dict_sha256', 'dictionary', 'excluded_blacklist', 'ignore', 'it', 'lexicon.sqlite', 'rb', 'rows_written', 'tokens_examined', 'utf-8', 'whitelist', 'whitelist_entries', 'whitelist_path', 'whitelist_sha256', 'wordfreq', 'wordfreq_limit', 'wordfreq_version']

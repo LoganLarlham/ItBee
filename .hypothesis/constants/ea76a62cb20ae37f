@@ -1,0 +1,4 @@
+# file: /Users/loganlarlham/Documents/ItBee/it_spelling_bee/lexicon/store.py
+# hypothesis_version: 6.148.2
+
+[4.0, '.sqlite', 'a', 'clean_form', 'data', 'lexicon.db', 'lexicon.sqlite', 'lexicon_sample.jsonl', 'mask', 'r', 'text', 'utf8', 'z', 'zipf']

@@ -37,7 +37,8 @@ def test_engine_basic_flow():
     
     # Invalid guess
     ok, msg, pts = eng.guess("zzz")
-    assert not ok and msg == "not in solution"
+    # missing the required letter should be reported explicitly
+    assert not ok and msg == "missing required letter"
     assert pts is None
 
 def test_engine_progress_tracking():

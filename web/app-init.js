@@ -1,0 +1,192 @@
+// Start
+window.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, loading lexicon...');
+
+    // Get loading screen elements
+    const loadingScreen = document.getElementById('loading-screen');
+    const progressFill = document.getElementById('progress-fill');
+    const loadingBytes = document.getElementById('loading-bytes');
+    const loadingTotal = document.getElementById('loading-total');
+
+    try {
+        // Load lexicon with progress
+        await lexiconLoader.load((received, total) => {
+            const percent = (received / total) * 100;
+            progressFill.style.width = percent + '%';
+            loadingBytes.textContent = Math.round(received / 1024);
+            loadingTotal.textContent = Math.round(total / 1024);
+        });
+
+        console.log('Lexicon loaded, initializing game...');
+
+        // Hide loading screen
+        setTimeout(() => {
+            loadingScreen.classList.remove('active');
+        }, 300);
+
+    } catch (error) {
+        console.error('Failed to load lexicon:', error);
+        alert('Failed to load word list. Please refresh the page.');
+        return;
+    }
+
+    const game = new Game();
+
+    // Setup events once after first init
+    game.setupEvents();
+
+    // Hook into submit for confetti - preserve original behavior
+    // REMOVED: Confetti logic moved to Game class
+
+
+    // New game controls - prevent modal from closing
+    const newGameBtn = document.getElementById('btn-new-game');
+    const seedGameBtn = document.getElementById('btn-seed-game');
+    const showWordsBtn = document.getElementById('btn-show-words');
+
+    console.log('New game button:', newGameBtn);
+    console.log('Seed game button:', seedGameBtn);
+    console.log('Show words button:', showWordsBtn);
+
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('New game clicked');
+            // Close modal first
+            if (settingsModal) {
+                settingsModal.classList.remove('active');
+            }
+            // Delay to ensure modal closes
+            setTimeout(() => {
+                game.init();
+            }, 100);
+        });
+    }
+
+    if (seedGameBtn) {
+        seedGameBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const seedInput = document.getElementById('seed-input');
+            const seed = parseInt(seedInput.value);
+            console.log('Seed game clicked, seed:', seed);
+            if (!isNaN(seed)) {
+                // Close modal first
+                if (settingsModal) {
+                    settingsModal.classList.remove('active');
+                }
+                // Delay to ensure modal closes
+                setTimeout(() => {
+                    game.init(seed);
+                }, 100);
+            }
+        });
+    }
+
+    if (showWordsBtn) {
+        showWordsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Show words clicked');
+            game.showAllWords();
+        });
+    }
+
+    // Modal functionality
+    const helpModal = document.getElementById('help-modal');
+    const settingsModal = document.getElementById('settings-modal');
+    const helpBtn = document.getElementById('btn-help');
+    const settingsBtn = document.getElementById('btn-settings');
+
+    console.log('Help modal:', helpModal);
+    console.log('Settings modal:', settingsModal);
+    console.log('Help button:', helpBtn);
+    console.log('Settings button:', settingsBtn);
+
+    // Open modals
+    if (helpBtn) {
+        helpBtn.addEventListener('click', (e) => {
+            console.log('Help button clicked!');
+            e.preventDefault();
+            e.stopPropagation();
+            if (helpModal) {
+                helpModal.classList.add('active');
+                console.log('Added active class to help modal');
+            }
+        });
+    }
+
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', (e) => {
+            console.log('Settings button clicked!');
+            e.preventDefault();
+            e.stopPropagation();
+            if (settingsModal) {
+                settingsModal.classList.add('active');
+                console.log('Added active class to settings modal');
+            }
+        });
+    }
+
+    // Close modals
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modalId = btn.getAttribute('data-modal');
+            console.log('Closing modal:', modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        });
+    });
+
+    // Close on background click
+    if (helpModal) {
+        helpModal.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal.classList.remove('active');
+            }
+        });
+    }
+
+    if (settingsModal) {
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Settings persistence
+    const darkMode = document.getElementById('dark-mode');
+    const soundEffects = document.getElementById('sound-effects');
+    const languageSelect = document.getElementById('language-select');
+
+    if (darkMode && soundEffects) {
+        // Load settings
+        darkMode.checked = localStorage.getItem('darkMode') === 'true';
+        soundEffects.checked = localStorage.getItem('soundEffects') === 'true';
+
+        // Save settings
+        darkMode.addEventListener('change', () => {
+            localStorage.setItem('darkMode', darkMode.checked);
+        });
+
+        soundEffects.addEventListener('change', () => {
+            localStorage.setItem('soundEffects', soundEffects.checked);
+        });
+    }
+
+    // Language selector
+    if (languageSelect) {
+        languageSelect.value = currentLang;
+        languageSelect.addEventListener('change', () => {
+            setLanguage(languageSelect.value);
+        });
+    }
+
+    // Initialize UI language
+    updateUILanguage();
+    console.log('Initialization complete');
+});
