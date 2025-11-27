@@ -29,11 +29,13 @@ class Game {
         // DOM Elements
         this.elInput = document.getElementById('input-text');
         this.elScore = document.getElementById('score');
+        this.elTotalPoints = document.getElementById('total-points');
         this.elGoalScore = document.getElementById('goal-score');
         this.elScoreBar = document.getElementById('score-bar');
         this.elRank = document.getElementById('rank');
         this.elWordList = document.getElementById('word-list');
-        this.elFoundCount = document.getElementById('found-count');
+        this.elFoundWordCount = document.getElementById('found-word-count');
+        this.elTotalWords = document.getElementById('total-words');
         this.elMessage = document.getElementById('message-area');
         this.elSeedDisplay = document.getElementById('seed-display');
 
@@ -88,7 +90,10 @@ class Game {
         this.input = "";
 
         this.elWordList.innerHTML = '';
-        this.elFoundCount.textContent = '0';
+        if (this.elFoundWordCount) this.elFoundWordCount.textContent = '0';
+        if (this.elTotalWords) this.elTotalWords.textContent = this.validWords.size;
+        if (this.elTotalPoints) this.elTotalPoints.textContent = this.totalPoints;
+        if (this.elGoalScore) this.elGoalScore.textContent = Math.floor(this.totalPoints * 0.55);
         this.updateInputDisplay();
         this.updateScore();
         this.renderHive();
@@ -235,8 +240,18 @@ class Game {
 
     updateScore() {
         this.elScore.textContent = this.score;
-        if (this.elGoalScore) {
-            this.elGoalScore.textContent = this.totalPoints;
+        if (this.elGoalScore && this.totalPoints) {
+            const goalScore = Math.floor(this.totalPoints * 0.55);
+            this.elGoalScore.textContent = goalScore;
+        }
+        if (this.elTotalPoints) {
+            this.elTotalPoints.textContent = this.totalPoints;
+        }
+        if (this.elFoundWordCount) {
+            this.elFoundWordCount.textContent = this.foundWords.size;
+        }
+        if (this.elTotalWords) {
+            this.elTotalWords.textContent = this.validWords.size;
         }
         const pct = Math.min(100, (this.score / this.totalPoints) * 100);
         this.elScoreBar.style.width = `${pct}%`;
@@ -258,7 +273,9 @@ class Game {
         const li = document.createElement('li');
         li.textContent = word;
         this.elWordList.prepend(li);
-        this.elFoundCount.textContent = this.foundWords.size;
+        if (this.elFoundWordCount) {
+            this.elFoundWordCount.textContent = this.foundWords.size;
+        }
     }
 
     showToast(msg, type = 'neutral') {

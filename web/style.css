@@ -66,41 +66,70 @@ h1 {
 
 .score-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 1rem;
     font-size: 1rem;
     background: white;
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
+    padding: 1rem;
+    border-radius: 15px;
     box-shadow: var(--shadow-soft);
     align-self: center;
     width: 100%;
     max-width: 400px;
+    margin-bottom: 3rem;
 }
 
 .rank {
+    font-size: 0.9rem;
     font-weight: 700;
-    min-width: 90px;
-    color: var(--primary-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
 }
 
 .score-bar-bg {
-    flex-grow: 1;
-    height: 8px;
-    background: #f0f0f0;
-    border-radius: 4px;
+    width: 100%;
+    height: 12px;
+    background: linear-gradient(90deg, #e0e0e0 0%, #f5f5f5 100%);
+    border-radius: 10px;
     overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .score-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-radius: 10px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.score-stats {
+    margin-top: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: center;
 }
 
 .score-text {
-    font-weight: 600;
-    white-space: nowrap;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.score-details {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.score-details .divider {
+    color: #ccc;
 }
 
 /* Main Game Area */

@@ -13,6 +13,8 @@ const translations = {
         rank_amazing: "Amazing",
         rank_genius: "Genius",
         points: "points",
+        goal_score: "Goal",
+        words_label: "Words",
 
         // Controls
         btn_delete: "Delete",
@@ -90,6 +92,8 @@ const translations = {
         rank_amazing: "Fantastico",
         rank_genius: "Genio",
         points: "punti",
+        goal_score: "Obiettivo",
+        words_label: "Parole",
 
         // Controls
         btn_delete: "Cancella",

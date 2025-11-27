@@ -53,8 +53,16 @@
                 <div class="score-bar-bg">
                     <div class="score-bar-fill" id="score-bar" style="width: 0%"></div>
                 </div>
-                <div class="score-text"><span id="score">0</span> / <span id="goal-score">0</span> <span
-                        data-i18n="points">punti</span></div>
+                <div class="score-stats">
+                    <div class="score-text"><span id="score">0</span> / <span id="total-points">0</span> <span
+                            data-i18n="points">punti</span></div>
+                    <div class="score-details">
+                        <span><span data-i18n="goal_score">Goal</span>: <span id="goal-score">0</span></span>
+                        <span class="divider">•</span>
+                        <span><span data-i18n="words_label">Words</span>: <span id="found-word-count">0</span>/<span
+                                id="total-words">0</span></span>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -86,7 +94,7 @@
             <div class="seed-display"><span data-i18n="seed">Seed</span>: <span id="seed-display">-</span></div>
 
             <div class="found-words">
-                <h3 data-i18n="found_words">Hai trovato <span id="found-count">0</span> parole</h3>
+                <h3 data-i18n="words_found">Parole Trovate</h3>
                 <div class="word-list" id="word-list"></div>
             </div>
         </main>
