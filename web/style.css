@@ -47,6 +47,27 @@ body {
     backdrop-filter: blur(10px);
 }
 
+@media (min-width: 768px) {
+    header {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Ensure score box doesn't overlap hexagons on desktop */
+    .score-container {
+        margin-bottom: 2rem;
+    }
+
+    /* Add top padding to main content on desktop */
+    main {
+        padding-top: 2rem;
+    }
+}
+
 /* Header */
 header {
     padding: 1.5rem;
