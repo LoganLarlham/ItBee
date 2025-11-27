@@ -1,4 +1,3 @@
 # Example whitelist: add special Italian forms or inflections
 # One word per line, normalized by the build script
-l'acqua
 aiutami
