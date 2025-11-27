@@ -173,29 +173,28 @@ function setLanguage(lang) {
 }
 
 function updateUILanguage() {
+    // Elements to skip (they contain dynamic content)
+    const skipIds = ['score', 'total-points', 'goal-score', 'found-word-count', 'total-words', 'seed-display'];
+
     // Update all elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(el => {
+        // Skip elements that are dynamic or contain dynamic children
+        if (skipIds.includes(el.id)) return;
+        if (el.querySelector && skipIds.some(id => el.querySelector(`#${id}`))) return;
+
         const key = el.getAttribute('data-i18n');
         if (el.tagName === 'INPUT' && el.getAttribute('placeholder')) {
             el.placeholder = t(key);
         } else {
-            el.innerHTML = t(key);
+            // Only update if element doesn't contain dynamic content
+            const hasSkippedChild = skipIds.some(id => el.querySelector(`#${id}`));
+            if (!hasSkippedChild) {
+                el.textContent = t(key);
+            }
         }
     });
 
     // Update title
     const titleEl = document.querySelector('h1');
     if (titleEl) titleEl.textContent = t('title');
-
-    // Update score display - preserve dynamic values
-    const scoreEl = document.getElementById('score');
-    const totalPointsEl = document.getElementById('total-points');
-    if (scoreEl && totalPointsEl) {
-        const score = scoreEl.textContent;
-        const totalPoints = totalPointsEl.textContent;
-        const scoreText = document.querySelector('.score-text');
-        if (scoreText) {
-            scoreText.innerHTML = `<span id="score">${score}</span> / <span id="total-points">${totalPoints}</span> <span data-i18n="points">${t('points')}</span>`;
-        }
-    }
 }

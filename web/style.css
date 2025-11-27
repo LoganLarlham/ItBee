@@ -59,17 +59,17 @@ body {
 
     /* Ensure score box doesn't overlap hexagons on desktop */
     .score-container {
-        margin-bottom: 3rem;
+        margin-bottom: 2.5rem;
     }
 
-    /* Add significant top padding to main content on desktop */
+    /* Add moderate top padding to main content on desktop */
     main {
-        padding-top: 4rem;
+        padding-top: 2.5rem;
     }
 
     /* More space for input area on desktop */
     .input-area {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 }
 
@@ -339,8 +339,8 @@ main {
     display: flex;
     gap: 0.8rem;
     justify-content: center;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    margin-top: 0rem;
+    margin-bottom: 0.8rem;
     width: 100%;
     max-width: 350px;
 }
