@@ -66,59 +66,86 @@ function wordOnlyUsesLetters(word, letters) {
 }
 
 // Generate game board with given seed and word list
-function generateGame(seed, wordList) {
+function generateGame(seed, wordList, requirePangram = true) {
     const rng = new SeededRandom(seed);
 
     // Italian letter frequencies
     const vowels = 'aeiou';
-    const consonants = 'bcdfghlmnprstvz';
+    const consonants = 'bcdf ghlmnprstvz';
 
-    // Try up to 50 times to generate a valid board
-    for (let attempt = 0; attempt < 50; attempt++) {
-        // Sample 7 letters: 2-3 vowels, rest consonants
-        const numVowels = rng.randInt(2, 4); // 2 or 3
-        const numConsonants = 7 - numVowels;
+    // If pangram is required, try multiple seed variations
+    const maxPangramAttempts = requirePangram ? 100 : 1;
 
-        const selectedVowels = rng.sample([...vowels], numVowels);
-        const selectedConsonants = rng.sample([...consonants], numConsonants);
-        const letters = [...selectedVowels, ...selectedConsonants];
+    for (let pangramAttempt = 0; pangramAttempt < maxPangramAttempts; pangramAttempt++) {
+        // Use a derived seed for retries
+        const attemptSeed = seed + (pangramAttempt * 1000);
+        const attemptRng = new SeededRandom(attemptSeed);
 
-        rng.shuffle(letters);
+        // Try up to 50 times to generate a valid board with this seed
+        for (let attempt = 0; attempt < 50; attempt++) {
+            // Sample 7 letters: 2-3 vowels, rest consonants
+            const numVowels = attemptRng.randInt(2, 4); // 2 or 3
+            const numConsonants = 7 - numVowels;
 
-        const center = letters[0];
-        const outer = letters.slice(1);
+            const selectedVowels = attemptRng.sample([...vowels], numVowels);
+            const selectedConsonants = attemptRng.sample([...consonants], numConsonants);
+            const letters = [...selectedVowels, ...selectedConsonants];
 
-        // Filter word list
-        const validWords = wordList.filter(word => {
-            return word.length >= 4 &&
-                word.includes(center) &&
-                wordOnlyUsesLetters(word, letters);
-        });
+            attemptRng.shuffle(letters);
 
-        // Check constraints (20-80 words for playability)
-        if (validWords.length >= 20 && validWords.length <= 80) {
-            // Calculate total points
-            let totalPoints = 0;
-            for (const word of validWords) {
-                let pts = word.length === 4 ? 1 : word.length;
-                // Pangram bonus (uses all 7 letters)
-                const uniqueLetters = new Set(word);
-                if (uniqueLetters.size === 7) {
-                    pts += 7;
+            const center = letters[0];
+            const outer = letters.slice(1);
+
+            // Filter word list
+            const validWords = wordList.filter(word => {
+                return word.length >= 4 &&
+                    word.includes(center) &&
+                    wordOnlyUsesLetters(word, letters);
+            });
+
+            // Check constraints (20-80 words for playability)
+            if (validWords.length >= 20 && validWords.length <= 80) {
+                // Check for pangrams if required
+                const pangrams = validWords.filter(word => new Set(word).size === 7);
+
+                if (requirePangram && pangrams.length === 0) {
+                    continue; // Try next board variation
                 }
-                totalPoints += pts;
-            }
 
-            return {
-                center,
-                outer,
-                valid_words: validWords,
-                total_points: totalPoints,
-                seed
-            };
+                // Calculate total points
+                let totalPoints = 0;
+                for (const word of validWords) {
+                    let pts = word.length === 4 ? 1 : word.length;
+                    // Pangram bonus (uses all 7 letters)
+                    const uniqueLetters = new Set(word);
+                    if (uniqueLetters.size === 7) {
+                        pts += 7;
+                    }
+                    totalPoints += pts;
+                }
+
+                if (requirePangram && pangramAttempt > 0) {
+                    console.log(`Found pangram on attempt ${pangramAttempt + 1} (${pangrams.length} pangrams)`);
+                }
+
+                return {
+                    center,
+                    outer,
+                    valid_words: validWords,
+                    total_points: totalPoints,
+                    seed: attemptSeed // Return the actual seed used
+                };
+            }
         }
     }
 
-    // Failed to generate valid board
+    // Failed to generate valid board with pangram
+    if (requirePangram) {
+        console.warn(`Could not generate board with pangram for seed ${seed} after ${maxPangramAttempts} attempts, returning best attempt`);
+        // Fall back to generating without pangram requirement
+        return generateGame(seed, wordList, false);
+    }
+
     throw new Error(`Could not generate valid board for seed ${seed}`);
 }
+
