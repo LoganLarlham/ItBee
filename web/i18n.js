@@ -187,10 +187,15 @@ function updateUILanguage() {
     const titleEl = document.querySelector('h1');
     if (titleEl) titleEl.textContent = t('title');
 
-    // Update points text
-    const pointsEl = document.querySelector('.score-text');
-    if (pointsEl) {
-        const score = document.getElementById('score').textContent;
-        pointsEl.innerHTML = `<span id="score">${score}</span> ${t('points')}`;
+    // Update score display - preserve dynamic values
+    const scoreEl = document.getElementById('score');
+    const totalPointsEl = document.getElementById('total-points');
+    if (scoreEl && totalPointsEl) {
+        const score = scoreEl.textContent;
+        const totalPoints = totalPointsEl.textContent;
+        const scoreText = document.querySelector('.score-text');
+        if (scoreText) {
+            scoreText.innerHTML = `<span id="score">${score}</span> / <span id="total-points">${totalPoints}</span> <span data-i18n="points">${t('points')}</span>`;
+        }
     }
 }
