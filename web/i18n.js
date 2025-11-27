@@ -59,7 +59,17 @@ const translations = {
         settings_about: "About",
         settings_about_title: "Information",
         settings_about_desc: "A word game inspired by the New York Times Spelling Bee.",
-        settings_about_tech: "Built with ❤️ using Cloudflare Workers and D1",
+        settings_about_tech: "Built with ❤️ using Client-Side Web Technologies",
+        game_title: "Italian Bee",
+        give_up: "🏳️ Give Up & Show Answers",
+
+        // Solution Modal
+        solution_title: "Solutions",
+        solution_total: "Total words",
+        solution_pangrams: "Pangrams",
+        solution_by_length: "By Length",
+        solution_letters: "Letters",
+        solution_center: "Center",
 
         // Debug
         debug_total: "Total",
@@ -69,7 +79,7 @@ const translations = {
     },
     it: {
         // Header
-        title: "Ape Italiana",
+        title: "Ape Italiana (per Marzia)",
         rank_beginner: "Principiante",
         rank_good: "Buon Inizio",
         rank_moving_up: "In Salita",
@@ -126,7 +136,17 @@ const translations = {
         settings_about: "Informazioni",
         settings_about_title: "Informazioni",
         settings_about_desc: "Un gioco di parole ispirato al New York Times Spelling Bee.",
-        settings_about_tech: "Sviluppato con ❤️ usando Cloudflare Workers e D1",
+        settings_about_tech: "Sviluppato con ❤️ usando Tecnologie Web Client-Side",
+        game_title: "Ape Italiana",
+        give_up: "🏳️ Arrenditi & Mostra Soluzioni",
+
+        // Solution Modal
+        solution_title: "Soluzioni",
+        solution_total: "Totale parole",
+        solution_pangrams: "Pangrammi",
+        solution_by_length: "Per Lunghezza",
+        solution_letters: "Lettere",
+        solution_center: "Centro",
 
         // Debug
         debug_total: "Totale",

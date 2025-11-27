@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen active">
@@ -51,29 +53,34 @@
                 <div class="score-bar-bg">
                     <div class="score-bar-fill" id="score-bar" style="width: 0%"></div>
                 </div>
-                <div class="score-text"><span id="score">0</span> <span data-i18n="points">punti</span></div>
+                <div class="score-text"><span id="score">0</span> / <span id="goal-score">0</span> <span
+                        data-i18n="points">punti</span></div>
             </div>
         </header>
 
         <main class="main-content">
-            <div class="honeycomb">
-                <div class="hex outer" data-letter="0"></div>
-                <div class="hex outer" data-letter="1"></div>
-                <div class="hex center" data-letter="center"></div>
-                <div class="hex outer" data-letter="2"></div>
-                <div class="hex outer" data-letter="3"></div>
-                <div class="hex outer" data-letter="4"></div>
-                <div class="hex outer" data-letter="5"></div>
+            <div class="hive-container">
+                <div class="hive">
+                    <div class="cell outer" data-letter="0"></div>
+                    <div class="cell outer" data-letter="1"></div>
+                    <div class="cell outer" data-letter="2"></div>
+                    <div class="cell center" data-letter="center"></div>
+                    <div class="cell outer" data-letter="3"></div>
+                    <div class="cell outer" data-letter="4"></div>
+                    <div class="cell outer" data-letter="5"></div>
+                </div>
             </div>
+
+            <div id="toast-container" class="toast-container"></div>
 
             <div class="input-area" id="input-text"></div>
 
             <div class="message-area" id="message-area"></div>
 
             <div class="actions">
-                <button class="action-btn" id="btn-delete" data-i18n="delete">Cancella</button>
-                <button class="action-btn" id="btn-shuffle" data-i18n="shuffle">Mischia</button>
-                 <button class="action-btn primary" id="btn-submit" data-i18n="enter">Invio</button>
+                <button class="action-btn" id="btn-delete" data-i18n="btn_delete">Cancella</button>
+                <button class="action-btn" id="btn-shuffle" data-i18n="btn_shuffle">Mischia</button>
+                <button class="action-btn primary" id="btn-submit" data-i18n="btn_enter">Invio</button>
             </div>
 
             <div class="seed-display"><span data-i18n="seed">Seed</span>: <span id="seed-display">-</span></div>
@@ -89,14 +96,28 @@
     <div id="help-modal" class="modal">
         <div class="modal-content">
             <button class="modal-close" data-modal="help-modal">×</button>
-            <h2 data-i18n="how_to_play">Come Si Gioca</h2>
+            <h2 data-i18n="help_title">Come Si Gioca</h2>
             <div class="modal-body">
-                <p data-i18n="help_text_1">Crea parole usando le lettere dell'alveare. Le parole devono contenere almeno 4 lettere e includere sempre la lettera centrale.</p>
-                <p data-i18n="help_text_2"><strong data-i18n="scoring">Punteggio:</strong></p>
+                <h3 data-i18n="help_objective">🎯 Obiettivo</h3>
+                <p data-i18n="help_objective_text">Trova tutte le parole italiane usando le lettere nell'alveare!</p>
+
+                <h3 data-i18n="help_rules">📝 Regole</h3>
                 <ul>
-                    <li data-i18n="help_4_letters">Parole di 4 lettere: 1 punto</li>
-                    <li data-i18n="help_longer">Parole più lunghe: 1 punto per lettera</li>
-                    <li data-i18n="help_pangram">Pangram (usa tutte e 7 le lettere): +7 punti bonus</li>
+                    <li data-i18n="help_rule_1">Le parole devono contenere almeno <strong>4 lettere</strong></li>
+                    <li data-i18n="help_rule_2">Ogni parola deve includere la <strong>lettera centrale</strong> (gialla)
+                    </li>
+                    <li data-i18n="help_rule_3">Puoi usare le lettere più volte</li>
+                    <li data-i18n="help_rule_4">Trova un <strong>pangramma</strong> (parola con tutte le 7 lettere) per
+                        punti bonus! 🎊</li>
+                </ul>
+
+                <h3 data-i18n="help_commands">⚡ Comandi</h3>
+                <ul>
+                    <li data-i18n="help_cmd_1"><strong>Clicca</strong> sulle lettere o <strong>digita</strong> sulla
+                        tastiera</li>
+                    <li data-i18n="help_cmd_2"><strong>Invio</strong> per inviare la parola</li>
+                    <li data-i18n="help_cmd_3"><strong>Cancella</strong> per rimuovere l'ultima lettera</li>
+                    <li data-i18n="help_cmd_4"><strong>Spazio</strong> per mescolare le lettere</li>
                 </ul>
             </div>
         </div>
@@ -106,37 +127,49 @@
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <button class="modal-close" data-modal="settings-modal">×</button>
-            <h2 data-i18n="settings">Impostazioni</h2>
+            <h2 data-i18n="settings_title">Impostazioni</h2>
             <div class="modal-body">
                 <div class="setting-group">
                     <label>
                         <input type="checkbox" id="dark-mode">
-                        <span data-i18n="dark_mode">Modalità Scura</span>
+                        <span data-i18n="settings_dark_mode">Modalità Scura</span>
                     </label>
                 </div>
                 <div class="setting-group">
                     <label>
                         <input type="checkbox" id="sound-effects">
-                        <span data-i18n="sound_effects">Effetti Sonori</span>
+                        <span data-i18n="settings_sound_effects">Effetti Sonori</span>
                     </label>
                 </div>
                 <div class="setting-group">
-                    <label for="language-select" data-i18n="language">Lingua:</label>
+                    <label for="language-select" data-i18n="settings_language">Lingua:</label>
                     <select id="language-select" class="language-dropdown">
                         <option value="it">Italiano 🇮🇹</option>
                         <option value="en">English 🇬🇧</option>
                     </select>
                 </div>
                 <hr>
-                <h3 data-i18n="game_controls">Controlli di Gioco</h3>
+                <h3 data-i18n="settings_game">Controlli di Gioco</h3>
                 <div class="game-controls">
-                    <button id="btn-new-game" class="control-btn" data-i18n="new_game">Nuovo Gioco</button>
+                    <button id="btn-new-game" class="control-btn" data-i18n="settings_new_game">Nuovo Gioco</button>
                     <div class="seed-input-group">
                         <input type="number" id="seed-input" placeholder="12345" min="1" max="999999">
-                        <button id="btn-seed-game" class="control-btn" data-i18n="use_seed">Usa Seed</button>
+                        <button id="btn-seed-game" class="control-btn" data-i18n="settings_load_seed">Usa Seed</button>
                     </div>
-                    <button id="btn-show-words" class="control-btn debug-btn" data-i18n="show_all_words">📊 Mostra Tutte le Parole (Debug)</button>
+                    <button id="btn-show-words" class="control-btn debug-btn" data-i18n="give_up">🏳️ Arrenditi & Mostra
+                        Soluzioni</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solution Modal -->
+    <div id="solution-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" data-modal="solution-modal">×</button>
+            <h2 data-i18n="solution_title">Soluzioni</h2>
+            <div class="modal-body">
+                <div id="solution-list" class="solution-list"></div>
             </div>
         </div>
     </div>
@@ -147,4 +180,5 @@
     <script src="app.js"></script>
     <script src="app-init.js"></script>
 </body>
+
 </html>

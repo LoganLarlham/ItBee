@@ -1,3 +1,17 @@
+// Daily seed calculation
+function getDailySeed() {
+    const now = new Date();
+    const utc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const epoch = Date.UTC(2024, 0, 1); // Jan 1, 2024
+    const daysSinceEpoch = Math.floor((utc.getTime() - epoch) / 86400000);
+    return 100000 + daysSinceEpoch; // Seeds start at 100000
+}
+
+function getTodayDateString() {
+    const now = new Date();
+    return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
+}
+
 // Game class
 
 class Game {
@@ -10,10 +24,12 @@ class Game {
         this.totalPoints = 0;
         this.input = "";
         this.currentSeed = null;
+        this.gameType = 'daily'; // 'daily' or 'random'
 
         // DOM Elements
         this.elInput = document.getElementById('input-text');
         this.elScore = document.getElementById('score');
+        this.elGoalScore = document.getElementById('goal-score');
         this.elScoreBar = document.getElementById('score-bar');
         this.elRank = document.getElementById('rank');
         this.elWordList = document.getElementById('word-list');
@@ -24,7 +40,7 @@ class Game {
         this.init();
     }
 
-    async init(seed = null) {
+    async init(seed = null, gameType = 'daily') {
         // Generate game client-side using local lexicon
         let data;
         try {
@@ -35,14 +51,20 @@ class Game {
 
             const wordList = await lexiconLoader.load();
 
-            // Generate random seed if not provided
-            if (seed === null) {
+            // Determine seed and game type
+            this.gameType = gameType;
+            if (gameType === 'daily' && seed === null) {
+                seed = getDailySeed();
+                console.log('Starting daily puzzle, seed:', seed);
+            } else if (seed === null) {
+                // Random game
                 seed = Math.floor(Math.random() * 999999) + 1;
+                console.log('Starting random game, seed:', seed);
             }
 
             // Generate game
             data = generateGame(seed, wordList);
-            console.log(`Generated game for seed ${seed}:`, {
+            console.log(`Generated ${gameType} game for seed ${seed}:`, {
                 letters: data.center + data.outer.join(''),
                 words: data.valid_words.length,
                 points: data.total_points
@@ -71,6 +93,9 @@ class Game {
         this.updateScore();
         this.renderHive();
         this.updateSeedDisplay();
+
+        // Save initial state
+        this.saveGameState();
     }
 
     renderHive() {
@@ -167,6 +192,9 @@ class Game {
             if (result.points >= 7) {
                 this.triggerConfetti();
             }
+
+            // Save progress
+            this.saveGameState();
         } else {
             this.showToast(result.message, 'error');
             this.shakeInput();
@@ -207,6 +235,9 @@ class Game {
 
     updateScore() {
         this.elScore.textContent = this.score;
+        if (this.elGoalScore) {
+            this.elGoalScore.textContent = this.totalPoints;
+        }
         const pct = Math.min(100, (this.score / this.totalPoints) * 100);
         this.elScoreBar.style.width = `${pct}%`;
 
@@ -305,26 +336,7 @@ class Game {
         }
     }
 
-    setupEvents() {
-        // Keyboard
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace') {
-                this.deleteLetter();
-            } else if (e.key === 'Enter') {
-                this.submit();
-            } else if (e.key === ' ') {
-                e.preventDefault();
-                this.shuffle();
-            } else if (/^[a-zA-Z]$/.test(e.key)) {
-                this.addLetter(e.key.toLowerCase());
-            }
-        });
 
-        // Buttons
-        document.getElementById('btn-delete').onclick = () => this.deleteLetter();
-        document.getElementById('btn-enter').onclick = () => this.submit();
-        document.getElementById('btn-shuffle').onclick = () => this.shuffle();
-    }
 
     showAllWords() {
         const wordsByLength = {};
@@ -342,28 +354,164 @@ class Game {
             }
         }
 
-        let output = `📊 TUTTE LE PAROLE VALIDE\n\n`;
-        output += `Centro: ${this.center.toUpperCase()}\n`;
-        output += `Lettere: ${this.center.toUpperCase()}, ${this.outer.map(l => l.toUpperCase()).join(', ')}\n`;
-        output += `Seed: ${this.currentSeed}\n\n`;
-        output += `Totale parole: ${this.validWords.size}\n`;
-        output += `Pangrams: ${pangrams.length}\n\n`;
+        // Build modal content
+        const solutionList = document.getElementById('solution-list');
+        solutionList.innerHTML = '';
 
+        // Summary section
+        const summary = document.createElement('div');
+        summary.className = 'solution-section';
+        summary.innerHTML = `
+            <p><strong>${t('solution_center')}:</strong> ${this.center.toUpperCase()}</p>
+            <p><strong>${t('solution_letters')}:</strong> ${this.center.toUpperCase()}, ${this.outer.map(l => l.toUpperCase()).join(', ')}</p>
+            <p><strong>${t('solution_total')}:</strong> ${this.validWords.size}</p>
+            <p><strong>${t('solution_pangrams')}:</strong> ${pangrams.length}</p>
+        `;
+        solutionList.appendChild(summary);
+
+        // Pangrams section
         if (pangrams.length > 0) {
-            output += `🎊 PANGRAMS:\n`;
-            pangrams.sort().forEach(p => output += `  • ${p}\n`);
-            output += `\n`;
+            const pangramSection = document.createElement('div');
+            pangramSection.className = 'solution-section';
+            pangramSection.innerHTML = `<h3>🎊 ${t('solution_pangrams')}</h3>`;
+
+            const pangramWords = document.createElement('div');
+            pangramWords.className = 'solution-words';
+            pangrams.sort().forEach(word => {
+                const span = document.createElement('span');
+                span.className = 'solution-word pangram';
+                if (this.foundWords.has(word)) {
+                    span.classList.add('found');
+                }
+                span.textContent = word;
+                pangramWords.appendChild(span);
+            });
+            pangramSection.appendChild(pangramWords);
+            solutionList.appendChild(pangramSection);
         }
 
-        output += `📝 PER LUNGHEZZA:\n`;
+        // Words by length
+        const byLengthSection = document.createElement('div');
+        byLengthSection.className = 'solution-section';
+        byLengthSection.innerHTML = `<h3>📝 ${t('solution_by_length')}</h3>`;
+
         const lengths = Object.keys(wordsByLength).map(Number).sort((a, b) => a - b);
         lengths.forEach(len => {
-            const words = wordsByLength[len].sort();
-            output += `\n${len} lettere (${words.length} parole):\n`;
-            output += words.join(', ') + '\n';
+            const lengthGroup = document.createElement('div');
+            lengthGroup.style.marginBottom = '1rem';
+
+            const heading = document.createElement('h4');
+            heading.style.fontSize = '0.9rem';
+            heading.style.color = '#666';
+            heading.style.marginBottom = '0.5rem';
+            heading.textContent = `${len} ${len === 1 ? 'lettera' : 'lettere'} (${wordsByLength[len].length})`;
+            lengthGroup.appendChild(heading);
+
+            const wordsDiv = document.createElement('div');
+            wordsDiv.className = 'solution-words';
+
+            wordsByLength[len].sort().forEach(word => {
+                const span = document.createElement('span');
+                span.className = 'solution-word';
+                if (this.foundWords.has(word)) {
+                    span.classList.add('found');
+                }
+                span.textContent = word;
+                wordsDiv.appendChild(span);
+            });
+
+            lengthGroup.appendChild(wordsDiv);
+            byLengthSection.appendChild(lengthGroup);
         });
 
-        console.log(output);
-        alert(`Lista completa stampata nella console!\n\nTotale: ${this.validWords.size} parole\nPangrams: ${pangrams.length}\n\nApri la console (F12) per vedere la lista completa.`);
+        solutionList.appendChild(byLengthSection);
+
+        // Open the modal
+        const modal = document.getElementById('solution-modal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+    }
+
+    saveGameState() {
+        try {
+            const state = {
+                dailyGame: null,
+                randomGame: null,
+                lastPlayedType: this.gameType
+            };
+
+            const gameData = {
+                seed: this.currentSeed,
+                foundWords: Array.from(this.foundWords),
+                score: this.score,
+                timestamp: Date.now(),
+                center: this.center,
+                outer: this.outer
+            };
+
+            if (this.gameType === 'daily') {
+                gameData.date = getTodayDateString();
+                state.dailyGame = gameData;
+                // Preserve random game if it exists
+                const existing = localStorage.getItem('game_state');
+                if (existing) {
+                    const existingState = JSON.parse(existing);
+                    state.randomGame = existingState.randomGame;
+                }
+            } else {
+                state.randomGame = gameData;
+                // Preserve daily game if it exists
+                const existing = localStorage.getItem('game_state');
+                if (existing) {
+                    const existingState = JSON.parse(existing);
+                    state.dailyGame = existingState.dailyGame;
+                }
+            }
+
+            localStorage.setItem('game_state', JSON.stringify(state));
+        } catch (error) {
+            console.error('Failed to save game state:', error);
+        }
+    }
+
+    loadGameState() {
+        try {
+            const saved = localStorage.getItem('game_state');
+            if (!saved) return null;
+
+            const state = JSON.parse(saved);
+
+            // Check if we should load daily or random game
+            const gameToLoad = this.gameType === 'daily' ? state.dailyGame : state.randomGame;
+
+            if (!gameToLoad) return null;
+
+            // For daily games, check if it's still today's puzzle
+            if (this.gameType === 'daily') {
+                if (gameToLoad.date !== getTodayDateString()) {
+                    // Old daily puzzle, clear it
+                    console.log('Daily puzzle expired, starting fresh');
+                    return null;
+                }
+            }
+
+            return gameToLoad;
+        } catch (error) {
+            console.error('Failed to load game state:', error);
+            return null;
+        }
+    }
+
+    restoreGameState(savedState) {
+        this.foundWords = new Set(savedState.foundWords);
+        this.score = savedState.score;
+
+        // Update UI
+        this.elWordList.innerHTML = '';
+        this.foundWords.forEach(word => this.addWordToList(word));
+        this.updateScore();
+
+        console.log('Game state restored:', this.foundWords.size, 'words found');
     }
 }

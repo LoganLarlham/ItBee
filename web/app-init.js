@@ -8,6 +8,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     const loadingBytes = document.getElementById('loading-bytes');
     const loadingTotal = document.getElementById('loading-total');
 
+    // Modal elements
+    const helpModal = document.getElementById('help-modal');
+    const settingsModal = document.getElementById('settings-modal');
+    const helpBtn = document.getElementById('btn-help');
+    const settingsBtn = document.getElementById('btn-settings');
+
     try {
         // Load lexicon with progress
         await lexiconLoader.load((received, total) => {
@@ -35,9 +41,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Setup events once after first init
     game.setupEvents();
 
-    // Hook into submit for confetti - preserve original behavior
-    // REMOVED: Confetti logic moved to Game class
-
+    // Check for saved state and restore if available
+    const savedState = game.loadGameState();
+    if (savedState && savedState.seed) {
+        // Restore the game with saved state
+        console.log('Restoring saved game state');
+        await game.init(savedState.seed, game.gameType);
+        game.restoreGameState(savedState);
+    } else {
+        // Start fresh daily puzzle
+        console.log('Starting fresh daily puzzle');
+        await game.init(null, 'daily');
+    }
 
     // New game controls - prevent modal from closing
     const newGameBtn = document.getElementById('btn-new-game');
@@ -52,14 +67,14 @@ window.addEventListener('DOMContentLoaded', async () => {
         newGameBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('New game clicked');
+            console.log('New random game clicked');
             // Close modal first
             if (settingsModal) {
                 settingsModal.classList.remove('active');
             }
-            // Delay to ensure modal closes
+            // Start a new random game
             setTimeout(() => {
-                game.init();
+                game.init(null, 'random');
             }, 100);
         });
     }
@@ -76,9 +91,9 @@ window.addEventListener('DOMContentLoaded', async () => {
                 if (settingsModal) {
                     settingsModal.classList.remove('active');
                 }
-                // Delay to ensure modal closes
+                // Start a random game with specific seed
                 setTimeout(() => {
-                    game.init(seed);
+                    game.init(seed, 'random');
                 }, 100);
             }
         });
@@ -94,15 +109,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Modal functionality
-    const helpModal = document.getElementById('help-modal');
-    const settingsModal = document.getElementById('settings-modal');
-    const helpBtn = document.getElementById('btn-help');
-    const settingsBtn = document.getElementById('btn-settings');
-
-    console.log('Help modal:', helpModal);
-    console.log('Settings modal:', settingsModal);
-    console.log('Help button:', helpBtn);
-    console.log('Settings button:', settingsBtn);
+    // Elements moved to top of scope
 
     // Open modals
     if (helpBtn) {
@@ -154,6 +161,15 @@ window.addEventListener('DOMContentLoaded', async () => {
         settingsModal.addEventListener('click', (e) => {
             if (e.target === settingsModal) {
                 settingsModal.classList.remove('active');
+            }
+        });
+    }
+
+    const solutionModal = document.getElementById('solution-modal');
+    if (solutionModal) {
+        solutionModal.addEventListener('click', (e) => {
+            if (e.target === solutionModal) {
+                solutionModal.classList.remove('active');
             }
         });
     }
