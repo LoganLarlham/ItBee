@@ -253,3 +253,96 @@ hr {
 .full-width {
     width: 100%;
 }
+
+/* Setting groups */
+.setting-group {
+    margin-bottom: 1.5rem;
+}
+
+.setting-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+}
+
+.setting-group input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    appearance: none;
+    background: #ddd;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.setting-group input[type="checkbox"]:checked {
+    background: var(--primary-color);
+}
+
+.setting-group input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+}
+
+.setting-group input[type="checkbox"]:checked::before {
+    left: 22px;
+}
+
+/* Solution list */
+.solution-list {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.solution-section {
+    margin-bottom: 1.5rem;
+}
+
+.solution-section h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    color: var(--text-color);
+}
+
+.solution-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.solution-word {
+    padding: 0.4rem 0.8rem;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+}
+
+.solution-word.found {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+    font-weight: 600;
+}
+
+.solution-word.pangram {
+    background: #fff3cd;
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.solution-word.pangram.found {
+    background: #b8dab8;
+    border-color: #28a745;
+}

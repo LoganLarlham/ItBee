@@ -42,3 +42,48 @@
 .seed-input::placeholder {
     color: #999;
 }
+
+.control-btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    border: 2px solid #eee;
+    background: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-main);
+    min-height: 44px;
+    white-space: nowrap;
+}
+
+.control-btn:hover {
+    border-color: var(--primary-color);
+    background: #f9f9f9;
+}
+
+.control-btn:active {
+    transform: scale(0.98);
+}
+
+/* Responsive adjustments for controls */
+@media (max-width: 480px) {
+    .game-controls {
+        padding: 0.8rem;
+    }
+
+    .seed-input-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .seed-input {
+        width: 100%;
+    }
+
+    .control-btn {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 0.7rem 1.2rem;
+    }
+}
