@@ -47,6 +47,7 @@ body {
     backdrop-filter: blur(10px);
 }
 
+/* Desktop and tablet optimizations */
 @media (min-width: 768px) {
     header {
         position: sticky;
@@ -59,17 +60,22 @@ body {
 
     /* Ensure score box doesn't overlap hexagons on desktop */
     .score-container {
-        margin-bottom: 2.5rem;
+        margin-bottom: clamp(2rem, 3vw, 2.5rem);
     }
 
-    /* Add moderate top padding to main content on desktop */
+    /* Adaptive top padding based on viewport height */
     main {
-        padding-top: 2.5rem;
+        padding-top: clamp(2rem, 4vh, 2.5rem);
     }
 
     /* More space for input area on desktop */
     .input-area {
-        margin-bottom: 1.5rem;
+        margin-bottom: clamp(1rem, 2vh, 1.5rem);
+    }
+
+    /* Allow actions to use more space on wider screens */
+    .actions {
+        max-width: min(95vw, 500px);
     }
 }
 
@@ -215,12 +221,15 @@ main {
     }
 }
 
-/* Hive Grid - True Hexagons */
+/* Hive Grid - True Hexagons with Responsive Sizing */
 .hive-container {
     margin-bottom: 0.5rem;
     position: relative;
-    width: 300px;
-    height: 300px;
+    /* Responsive sizing: scale with viewport but cap at 350px */
+    width: min(80vw, 350px);
+    height: min(80vw, 350px);
+    max-width: 350px;
+    max-height: 350px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,19 +237,22 @@ main {
 
 .hive {
     position: relative;
-    width: 280px;
-    height: 280px;
+    /* Scale with container */
+    width: 100%;
+    height: 100%;
 }
 
 .cell {
-    width: 85px;
-    height: 98px;
-    /* width * 1.15 for hexagon ratio */
+    /* Responsive cell sizing */
+    width: min(19vw, 85px);
+    height: min(22vw, 98px);
+    max-width: 85px;
+    max-height: 98px;
     background-color: var(--cell-bg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
     font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
@@ -252,19 +264,7 @@ main {
     color: var(--text-color);
 }
 
-@media (max-width: 414px) {
-    .hive-container {
-        transform: scale(0.9);
-        margin-bottom: 1.5rem;
-    }
-}
-
-@media (max-width: 350px) {
-    .hive-container {
-        transform: scale(0.8);
-        margin-bottom: 1rem;
-    }
-}
+/* Removed old fixed-size transform media queries - now using responsive min() */
 
 .cell:active {
     transform: translate(-50%, -50%) scale(0.9) !important;
@@ -334,30 +334,34 @@ main {
 
 /* cell-6: Top Left */
 
-/* Game Actions */
+/* Game Actions - Responsive Wrapping Layout */
 .actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.8rem;
     justify-content: center;
     margin-top: 0rem;
     margin-bottom: 0.8rem;
     width: 100%;
-    max-width: 350px;
+    /* Scale with viewport but cap at reasonable size */
+    max-width: min(90vw, 450px);
+    padding: 0 1rem;
 }
 
 .action-btn {
-    padding: 0.8rem 1.2rem;
+    /* Flexible sizing with minimum touch target */
+    padding: clamp(0.6rem, 2vw, 0.8rem) clamp(1rem, 3vw, 1.2rem);
     border-radius: 50px;
     border: 2px solid #eee;
     background: white;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 2.5vw, 0.9rem);
     cursor: pointer;
     transition: all 0.2s;
     font-family: var(--font-main);
     color: var(--text-color);
-    flex: 1;
-    min-width: 80px;
+    flex: 1 1 auto;
+    min-width: max(25%, 80px);
     min-height: 44px;
     display: flex;
     align-items: center;
@@ -382,18 +386,7 @@ main {
     background-color: var(--primary-dark);
 }
 
-/* Small screen responsiveness */
-@media (max-width: 375px) {
-    .actions {
-        flex-direction: column;
-        max-width: 200px;
-    }
-
-    .action-btn {
-        width: 100%;
-        min-width: 150px;
-    }
-}
+/* Removed old small-screen vertical stack - actions now wrap intelligently with flex-wrap */
 
 /* Controls */
 .controls {
