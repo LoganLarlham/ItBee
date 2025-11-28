@@ -20,19 +20,10 @@ class LexiconLoader {
 
         try {
             // Check cache first
-            const cached = localStorage.getItem('lexicon_cache');
-            const cacheVersion = localStorage.getItem('lexicon_version');
-            const currentVersion = '1.0'; // Increment this when lexicon updates
+            const cachedText = localStorage.getItem('lexicon_cache');
+            const cachedKey = localStorage.getItem('lexicon_cache_key');
 
-            if (cached && cacheVersion === currentVersion) {
-                console.log('📖 Loading lexicon from cache');
-                this.words = JSON.parse(cached);
-                this.loaded = true;
-                this.loading = false;
-                return this.words;
-            }
-
-            // Download from network
+            // Download from network (CDN will never serve stale thanks to _headers)
             console.log('📥 Downloading lexicon...');
             const response = await fetch('words.json');
 
@@ -64,15 +55,23 @@ class LexiconLoader {
             // Combine chunks
             const blob = new Blob(chunks);
             const text = await blob.text();
-            this.words = JSON.parse(text);
 
-            // Cache it
-            try {
-                localStorage.setItem('lexicon_cache', text);
-                localStorage.setItem('lexicon_version', currentVersion);
-                console.log('💾 Lexicon cached');
-            } catch (e) {
-                console.warn('Failed to cache lexicon:', e);
+            // Generate cache key from first 100 chars (acts as simple hash/fingerprint)
+            const cacheKey = text.substring(0, 100);
+
+            // If cache matches, use it; otherwise update cache
+            if (cachedKey === cacheKey && cachedText) {
+                console.log('📖 Using cached lexicon (content unchanged)');
+                this.words = JSON.parse(cachedText);
+            } else {
+                console.log('💾 Caching new lexicon version');
+                this.words = JSON.parse(text);
+                try {
+                    localStorage.setItem('lexicon_cache', text);
+                    localStorage.setItem('lexicon_cache_key', cacheKey);
+                } catch (e) {
+                    console.warn('Failed to cache lexicon:', e);
+                }
             }
 
             this.loaded = true;

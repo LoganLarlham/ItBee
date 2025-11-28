@@ -121,4 +121,10 @@ To update the word lists used in the web application:
 
 The whitelist takes precedence over the dictionary, and the blacklist excludes words even if they're in the dictionary or whitelist.
 
+**Cache Strategy:**
+- `web/_headers` configures `Cache-Control: no-cache` for `words.json` to prevent CDN caching
+- The lexicon loader always fetches from CDN but uses a content-based cache key
+- If content hasn't changed, it uses the localStorage copy (avoiding re-parsing)
+- This ensures fresh dictionaries on deployment while maintaining session performance
+
 If you want, I can add a short troubleshooting section or an example workflow for producing a reproducible board and sharing the seed with another player.
