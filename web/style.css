@@ -304,44 +304,44 @@ main {
 /* In HTML: cells 1,2,3 then center(0), then cells 4,5,6 */
 /* So nth-child: 1,2,3,4(center),5,6,7 */
 .cell.outer:nth-child(1) {
-    top: 10%;
+    top: 15%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
 /* cell-1: Top */
 .cell.outer:nth-child(2) {
-    top: 30%;
-    left: 82%;
+    top: 35%;
+    left: 75%;
     transform: translate(-50%, -50%);
 }
 
 /* cell-2: Top Right */
 .cell.outer:nth-child(3) {
-    top: 70%;
-    left: 82%;
+    top: 65%;
+    left: 75%;
     transform: translate(-50%, -50%);
 }
 
 /* cell-3: Bottom Right */
 /* cell-0: Center */
 .cell.outer:nth-child(5) {
-    top: 90%;
+    top: 85%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
 /* cell-4: Bottom */
 .cell.outer:nth-child(6) {
-    top: 70%;
-    left: 18%;
+    top: 65%;
+    left: 25%;
     transform: translate(-50%, -50%);
 }
 
 /* cell-5: Bottom Left */
 .cell.outer:nth-child(7) {
-    top: 30%;
-    left: 18%;
+    top: 35%;
+    left: 25%;
     transform: translate(-50%, -50%);
 }
 
