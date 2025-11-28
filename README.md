@@ -85,4 +85,40 @@ Development notes
 - The lexicon builder does not expand `.aff` rules. If you need inflected word forms, either provide an expanded list or add common inflections to `data/whitelist.txt`.
 - The builder records provenance (paths + SHA256 + wordfreq limit/version + timestamp) in the SQLite `meta` table for reproducibility.
 
+Updating Whitelist/Blacklist and Deploying to Web
+--------------------------------------------------
+
+To update the word lists used in the web application:
+
+1. **Edit the lists**:
+   - Add words to `data/whitelist.txt` (one word per line)
+   - Add words to `data/blacklist.txt` (one word per line)
+
+2. **Download Italian dictionary** (if needed):
+   ```bash
+   curl -L -o /tmp/it_IT.dic "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/it_IT/it_IT.dic"
+   ```
+
+3. **Rebuild the lexicon**:
+   ```bash
+   python3 -m it_spelling_bee.lexicon.build \
+       --dict /tmp/it_IT.dic \
+       --whitelist data/whitelist.txt \
+       --blacklist data/blacklist.txt \
+       --out ~/.it_spelling_bee/lexicon.sqlite \
+       --limit 200000
+   ```
+
+4. **Export to JSON for web**:
+   ```bash
+   python3 scripts/export_lexicon_to_json.py
+   ```
+
+5. **Deploy to Cloudflare Pages**:
+   ```bash
+   cd web && wrangler pages deploy . --project-name ape-italiana
+   ```
+
+The whitelist takes precedence over the dictionary, and the blacklist excludes words even if they're in the dictionary or whitelist.
+
 If you want, I can add a short troubleshooting section or an example workflow for producing a reproducible board and sharing the seed with another player.

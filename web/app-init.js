@@ -176,21 +176,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Settings persistence
     const darkMode = document.getElementById('dark-mode');
-    const soundEffects = document.getElementById('sound-effects');
     const languageSelect = document.getElementById('language-select');
 
-    if (darkMode && soundEffects) {
+    if (darkMode) {
         // Load settings
         darkMode.checked = localStorage.getItem('darkMode') === 'true';
-        soundEffects.checked = localStorage.getItem('soundEffects') === 'true';
 
         // Save settings
         darkMode.addEventListener('change', () => {
             localStorage.setItem('darkMode', darkMode.checked);
-        });
-
-        soundEffects.addEventListener('change', () => {
-            localStorage.setItem('soundEffects', soundEffects.checked);
         });
     }
 

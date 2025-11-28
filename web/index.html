@@ -91,7 +91,7 @@
                 <button class="action-btn primary" id="btn-submit" data-i18n="btn_enter">Invio</button>
             </div>
 
-            <div class="seed-display"><span data-i18n="seed">Seed</span>: <span id="seed-display">-</span></div>
+            <!-- Seed display moved to settings -->
 
             <div class="found-words">
                 <h3 data-i18n="words_found">Parole Trovate</h3>
@@ -143,12 +143,7 @@
                         <span data-i18n="settings_dark_mode">Modalità Scura</span>
                     </label>
                 </div>
-                <div class="setting-group">
-                    <label>
-                        <input type="checkbox" id="sound-effects">
-                        <span data-i18n="settings_sound_effects">Effetti Sonori</span>
-                    </label>
-                </div>
+                <!-- Sound effects removed -->
                 <div class="setting-group">
                     <label for="language-select" data-i18n="settings_language">Lingua:</label>
                     <select id="language-select" class="language-dropdown">
@@ -166,6 +161,9 @@
                     </div>
                     <button id="btn-show-words" class="control-btn debug-btn" data-i18n="give_up">🏳️ Arrenditi & Mostra
                         Soluzioni</button>
+                    <div class="current-seed-info">
+                        <span data-i18n="seed">Seed</span>: <span id="seed-display">-</span>
+                    </div>
                 </div>
             </div>
         </div>

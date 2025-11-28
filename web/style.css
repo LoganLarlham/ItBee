@@ -183,7 +183,8 @@ main {
 }
 
 .message-area {
-    height: 2rem;
+    min-height: 2rem;
+    /* Ensure height even when empty */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -191,6 +192,9 @@ main {
     font-weight: 600;
     color: var(--text-color);
     font-size: 1.1rem;
+    text-align: center;
+    z-index: 5;
+    /* Ensure above other elements */
 }
 
 .input-area {
@@ -253,7 +257,8 @@ main {
 .cell {
     /* Cells scale with container - 24% gives good hexagon size */
     width: 24%;
-    aspect-ratio: 0.866 / 1;
+    aspect-ratio: 1 / 0.866;
+    /* Flat-top aspect ratio (width > height) */
     background-color: var(--cell-bg);
     display: flex;
     align-items: center;
@@ -264,8 +269,9 @@ main {
     text-transform: uppercase;
     cursor: pointer;
     position: absolute;
-    /* Hexagon Shape */
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    /* Hexagon Shape - Flat Top */
+    /* Points: TopLeft(25% 0%), TopRight(75% 0%), Right(100% 50%), BottomRight(75% 100%), BottomLeft(25% 100%), Left(0% 50%) */
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
     transition: transform 0.1s, background-color 0.2s;
     -webkit-tap-highlight-color: transparent;
     color: var(--text-color);
