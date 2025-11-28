@@ -1,8 +1,8 @@
 :root {
+    /* Light mode (default) */
     --bg-color: #fafafa;
     --text-color: #2c3e50;
     --primary-color: #FFD700;
-    /* Golden Yellow */
     --primary-dark: #e6c200;
     --accent-color: #2c3e50;
     --cell-bg: #e8e8e8;
@@ -10,9 +10,31 @@
     --center-cell-bg: #FFD700;
     --error-color: #e74c3c;
     --success-color: #2ecc71;
-    --font-main: 'Outfit', sans-serif;
+    --card-bg: white;
+    --border-color: rgba(0, 0, 0, 0.05);
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
     --shadow-hard: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --dot-color: rgba(224, 224, 224, 1);
+    --font-main: 'Outfit', sans-serif;
+}
+
+body.dark-mode {
+    /* Dark mode overrides */
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --cell-bg: #2a2a2a;
+    --cell-hover: #3a3a3a;
+    --card-bg: #242424;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-hard: 0 2px 4px rgba(0, 0, 0, 0.5);
+    --dot-color: rgba(80, 80, 80, 1);
+
+    /* Keep accent colors vibrant */
+    --primary-color: #FFD700;
+    --center-cell-bg: #FFD700;
+    --error-color: #ff6b6b;
+    --success-color: #51cf66;
 }
 
 * {
@@ -29,12 +51,11 @@ body {
     color: var(--text-color);
     height: 100vh;
     height: 100dvh;
-    /* Dynamic viewport height */
     width: 100%;
     overflow: hidden;
-    /* Prevent body scroll, handle in grid */
-    background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+    background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
     background-size: 20px 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .game-container {
@@ -46,8 +67,9 @@ body {
     /* Increased max-width for desktop sidebar */
     margin: 0 auto;
     position: relative;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
+    transition: background-color 0.3s ease;
 }
 
 /* Desktop and tablet optimizations */
@@ -88,7 +110,13 @@ header {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(250, 250, 250, 0.5);
+    transition: background-color 0.3s ease;
+}
+
+body.dark-mode header {
+    background: rgba(42, 42, 42, 0.5);
 }
 
 h1 {
@@ -105,7 +133,7 @@ h1 {
     align-items: center;
     gap: 0.3rem;
     font-size: 0.9rem;
-    background: white;
+    background: var(--card-bg);
     padding: 0.5rem 0.8rem;
     border-radius: 12px;
     box-shadow: var(--shadow-soft);
@@ -365,8 +393,8 @@ main {
     /* Flexible sizing with minimum touch target */
     padding: clamp(0.6rem, 2vw, 0.8rem) clamp(1rem, 3vw, 1.2rem);
     border-radius: 50px;
-    border: 2px solid #eee;
-    background: white;
+    border: 2px solid var(--border-color);
+    background: rgba(250, 250, 250, 0.5);
     font-weight: 600;
     font-size: clamp(0.85rem, 2.5vw, 0.9rem);
     cursor: pointer;
@@ -386,6 +414,10 @@ main {
 .action-btn:active {
     transform: scale(0.95);
     background-color: #f5f5f5;
+}
+
+body.dark-mode .action-btn {
+    background: rgba(42, 42, 42, 0.5);
 }
 
 .action-btn.primary {
@@ -467,7 +499,7 @@ main {
 
 .word-list li {
     padding: 0.4rem 1rem;
-    background: white;
+    background: var(--card-bg);
     border-radius: 20px;
     border: 1px solid rgba(0, 0, 0, 0.05);
     font-size: 0.95rem;
@@ -516,8 +548,8 @@ main {
 }
 
 .toast.success {
-    background: white;
-    color: #2c3e50;
+    background: var(--card-bg);
+    color: var(--text-color);
     border: 2px solid var(--primary-color);
 }
 
