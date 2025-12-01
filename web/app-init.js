@@ -179,12 +179,23 @@ window.addEventListener('DOMContentLoaded', async () => {
     const languageSelect = document.getElementById('language-select');
 
     if (darkMode) {
-        // Load settings
-        darkMode.checked = localStorage.getItem('darkMode') === 'true';
+        // Apply dark mode from localStorage on page load
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        }
+        darkMode.checked = isDarkMode;
 
-        // Save settings
+        // Toggle dark mode when checkbox changes
         darkMode.addEventListener('change', () => {
-            localStorage.setItem('darkMode', darkMode.checked);
+            const enabled = darkMode.checked;
+            localStorage.setItem('darkMode', enabled);
+
+            if (enabled) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
         });
     }
 
