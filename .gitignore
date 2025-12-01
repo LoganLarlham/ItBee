@@ -1,9 +1,19 @@
 # Ignore local large dictionary file
 it_spelling_bee/data/italian.dic
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
+.hypothesis/
+*.dic
+*.aff
+.DS_Store
+*.sqlite
+*.sql
+debug_*.py
+debug_*.txt
+*.log
 .venv/
-dist/
-build/
-*.egg-info/
-/.mypy_cache
+venv/
+node_modules/
+.wrangler/mypy_cache
