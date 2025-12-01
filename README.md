@@ -1,6 +1,8 @@
 # 🐝 Ape Italiana - Italian Spelling Bee
 
-A modern web implementation of the classic Spelling Bee word puzzle game, adapted for Italian.
+Live on [Itbee.app](https://ItBee.app) 
+
+A web implementation of the NYT Spelling Bee word puzzle game, but in Italian.
 
 [![Live Demo](https://img.shields.io/badge/demo-live-success)](https://ape-italiana.pages.dev)
 
@@ -14,14 +16,13 @@ A modern web implementation of the classic Spelling Bee word puzzle game, adapte
 
 ## Features
 
-- 🎮 **Daily Puzzle** - New challenge every day at UTC midnight
-- 🎲 **Random Mode** - Generate unlimited practice puzzles
-- 💾 **Auto-save** - Never lose your progress
-- 🌙 **Dark Mode** - Easy on the eyes
-- 🌐 **Bilingual UI** - Italian and English support
-- 📱 **Fully Responsive** - Works on mobile, tablet, and desktop
+- **Daily Puzzle** - New challenge every day at UTC midnight
+- **Random Mode** - Generate unlimited practice puzzles
+- **Auto-save** - Never lose your progress
+- **Dark Mode** - Easy on the eyes
+- **Bilingual UI** - Italian and English support
 
-## Tech Stack
+## Tech
 
 - **Frontend**: Vanilla JavaScript, CSS Grid, HTML5
 - **Dictionary**: 46,000+ Italian words with whitelist/blacklist support
@@ -54,9 +55,6 @@ python scripts/export_lexicon_to_json.py
 cd web && wrangler pages deploy . --project-name ape-italiana
 ```
 
-## License
-
-MIT License - See LICENSE file for details
 
 ## Credits
 
