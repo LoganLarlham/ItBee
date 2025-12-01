@@ -59,3 +59,4 @@ cd web && wrangler pages deploy . --project-name ape-italiana
 ## Credits
 
 Inspired by the New York Times Spelling Bee. Dictionary sourced from Italian Hunspell dictionaries and wordfreq.
+Built with the help of Antigravity.
