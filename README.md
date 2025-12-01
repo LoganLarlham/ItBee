@@ -1,130 +1,63 @@
-# Italian Spelling Bee (minimal MVP)
+# 🐝 Ape Italiana - Italian Spelling Bee
 
-This is a minimal offline CLI implementation of the Italian Spelling Bee described in `ItBee_Plan.md`.
+A modern web implementation of the classic Spelling Bee word puzzle game, adapted for Italian.
 
-Overview
---------
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://ape-italiana.pages.dev)
 
-This repository contains a small CLI game plus tools to build a local offline Italian lexicon. The core idea: generate a 7-letter board with a required center letter and score Italian words that use those letters.
+## About
 
-Project layout
---------------
+**Ape Italiana** challenges players to construct Italian words using a set of 7 letters arranged in a hexagonal grid. Each puzzle features:
 
-- `it_spelling_bee/` - main package
-	- `cli.py` - command-line interface and REPL
-	- `engine.py` - game engine, state, guesses, progress
-	- `generator.py` - board generator (uses lexicon)
-	- `letters.py` - normalization, masks, shuffle helpers
-	- `lexicon/` - lexicon tooling
-		- `build.py` - build local SQLite lexicon from wordfreq + Hunspell + overrides
-		- `store.py` - small runtime lexicon store used by the generator
-	- `rules.py` - validation rules (length, required letter, allowed letters)
-	- `scoring.py` - scoring heuristics (zipf-based + length + pangram bonus)
-	- `typing.py` - dataclasses for board/word types
-	- `persistence.py` - (future) save/load game state
-- `data/` - small sample resources and example whitelist/blacklist (not authoritative)
-- `tests/` - pytest unit tests
-- `PROJECT_SUMMARY.md`, `ItBee_Plan.md`, `README.md` - docs and notes
+- A center letter that must be used in every word
+- 6 surrounding letters that can be used in any combination
+- A guaranteed "pangram" - at least one word using all 7 letters
 
-Quick start
------------
+## Features
 
-1. Create and activate a virtualenv (recommended):
+- 🎮 **Daily Puzzle** - New challenge every day at UTC midnight
+- 🎲 **Random Mode** - Generate unlimited practice puzzles
+- 💾 **Auto-save** - Never lose your progress
+- 🌙 **Dark Mode** - Easy on the eyes
+- 🌐 **Bilingual UI** - Italian and English support
+- 📱 **Fully Responsive** - Works on mobile, tablet, and desktop
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
+## Tech Stack
 
-2. Install requirements:
+- **Frontend**: Vanilla JavaScript, CSS Grid, HTML5
+- **Dictionary**: 46,000+ Italian words with whitelist/blacklist support
+- **Deployment**: Cloudflare Pages
+- **Game Logic**: Deterministic seeded random generation
 
-```bash
-python -m pip install -r requirements.txt
-```
+## Project Structure
 
-3. Build the full offline lexicon (recommended if you want a complete game):
+- `web/` - Client-side web application
+- `it_spelling_bee/` - Python CLI and lexicon builder
+- `data/` - Dictionary whitelist/blacklist
+- `scripts/` - Build tools
+
+## Development
 
 ```bash
-# Required: point at an Italian Hunspell .dic file (LibreOffice or wooorm mirror)
+# Install dependencies (for lexicon building)
+pip install -r requirements.txt
+
+# Build custom lexicon (optional)
 python -m it_spelling_bee.lexicon.build \
-	--dict /path/to/it_IT.dic \
-	--whitelist data/whitelist.txt \
-	--blacklist data/blacklist.txt \
-	--out ~/.it_spelling_bee/lexicon.sqlite \
-	--limit 200000
+    --dict /path/to/it_IT.dic \
+    --whitelist data/whitelist.txt \
+    --blacklist data/blacklist.txt
+
+# Export to web format
+python scripts/export_lexicon_to_json.py
+
+# Deploy
+cd web && wrangler pages deploy . --project-name ape-italiana
 ```
 
-Notes:
-- The builder intersects `wordfreq` tokens with an authoritative Hunspell `.dic` and applies blacklist/whitelist overrides. Precedence: blacklist > whitelist > dictionary.
-- If you don't want to build, the repo includes a tiny sample lexicon used for quick testing.
+## License
 
-4. Run the CLI:
+MIT License - See LICENSE file for details
 
-```bash
-python -m it_spelling_bee.cli
-```
+## Credits
 
-CLI tips
---------
-- In-game commands: `help`, `shuffle`, `hint`, `list`, `score`, `giveup`, `printseed`, `quit`.
-- `printseed` prints the current game's seed (decimal and hex) so you can reproduce the board with `--seed`.
-- Accented letters are normalized by stripping diacritics (e.g. `è` -> `e`). Enter words without accents or they will be treated as their base letters.
-
-Testing
--------
-
-Run the unit test suite from the repository root (PYTHONPATH required if running from source):
-
-```bash
-PYTHONPATH=$(pwd) python -m pytest -q
-```
-
-Development notes
------------------
-- Hunspell `.dic` files are large and are ignored by `.gitignore` in this repo; keep authoritative dictionaries local and record their SHA256 in lexicon meta.
-- The lexicon builder does not expand `.aff` rules. If you need inflected word forms, either provide an expanded list or add common inflections to `data/whitelist.txt`.
-- The builder records provenance (paths + SHA256 + wordfreq limit/version + timestamp) in the SQLite `meta` table for reproducibility.
-
-Updating Whitelist/Blacklist and Deploying to Web
---------------------------------------------------
-
-To update the word lists used in the web application:
-
-1. **Edit the lists**:
-   - Add words to `data/whitelist.txt` (one word per line)
-   - Add words to `data/blacklist.txt` (one word per line)
-
-2. **Download Italian dictionary** (if needed):
-   ```bash
-   curl -L -o /tmp/it_IT.dic "https://cgit.freedesktop.org/libreoffice/dictionaries/plain/it_IT/it_IT.dic"
-   ```
-
-3. **Rebuild the lexicon**:
-   ```bash
-   python3 -m it_spelling_bee.lexicon.build \
-       --dict /tmp/it_IT.dic \
-       --whitelist data/whitelist.txt \
-       --blacklist data/blacklist.txt \
-       --out ~/.it_spelling_bee/lexicon.sqlite \
-       --limit 200000
-   ```
-
-4. **Export to JSON for web**:
-   ```bash
-   python3 scripts/export_lexicon_to_json.py
-   ```
-
-5. **Deploy to Cloudflare Pages**:
-   ```bash
-   cd web && wrangler pages deploy . --project-name ape-italiana
-   ```
-
-The whitelist takes precedence over the dictionary, and the blacklist excludes words even if they're in the dictionary or whitelist.
-
-**Cache Strategy:**
-- `web/_headers` configures `Cache-Control: no-cache` for `words.json` to prevent CDN caching
-- The lexicon loader always fetches from CDN but uses a content-based cache key
-- If content hasn't changed, it uses the localStorage copy (avoiding re-parsing)
-- This ensures fresh dictionaries on deployment while maintaining session performance
-
-If you want, I can add a short troubleshooting section or an example workflow for producing a reproducible board and sharing the seed with another player.
+Inspired by the New York Times Spelling Bee. Dictionary sourced from Italian Hunspell dictionaries and wordfreq.
