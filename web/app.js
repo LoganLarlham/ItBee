@@ -101,6 +101,11 @@ class Game {
 
         // Save initial state
         this.saveGameState();
+
+        // Track game start event (Umami Analytics)
+        if (typeof umami !== 'undefined') {
+            umami.track('game_start', { type: this.gameType, seed: this.currentSeed });
+        }
     }
 
     renderHive() {
@@ -232,6 +237,12 @@ class Game {
         const unique = new Set(word);
         if (unique.size === 7) {
             points += 7;
+
+            // Track pangram event (Umami Analytics)
+            if (typeof umami !== 'undefined') {
+                umami.track('pangram_found', { word: word, type: this.gameType });
+            }
+
             return { ok: true, points, message: "PANGRAMMA!" };
         }
 
@@ -243,6 +254,17 @@ class Game {
         if (this.elGoalScore && this.totalPoints) {
             const goalScore = Math.floor(this.totalPoints * 0.55);
             this.elGoalScore.textContent = goalScore;
+
+            // Track win event when player reaches goal score (Umami Analytics)
+            if (this.score >= goalScore && this.score - (this.score > 0 ? 1 : 0) < goalScore) {
+                if (typeof umami !== 'undefined') {
+                    umami.track('game_win', {
+                        type: this.gameType,
+                        score: this.score,
+                        words_found: this.foundWords.size
+                    });
+                }
+            }
         }
         if (this.elTotalPoints) {
             this.elTotalPoints.textContent = this.totalPoints;

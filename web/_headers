@@ -1,10 +1,9 @@
 # Cache Control Headers for Cloudflare Pages
 
-# Prevent CDN caching of words.json to ensure fresh dictionary on every deployment
-/words.json
-  Cache-Control: no-cache, must-revalidate, max-age=0
+# Note: words.json caching is managed by Cloudflare Cache Rules
+# Edge TTL: 120s, Browser TTL: 0s (configured in dashboard)
 
-# Allow caching of static assets (CSS, JS, images)
+# Allow aggressive caching of static assets (CSS, JS, fonts)
 /*.css
   Cache-Control: public, max-age=31536000, immutable
 /*.js

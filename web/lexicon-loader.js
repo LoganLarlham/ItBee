@@ -20,12 +20,13 @@ class LexiconLoader {
 
         try {
             // Check cache first
-            const cachedText = localStorage.getItem('lexicon_cache');
-            const cachedKey = localStorage.getItem('lexicon_cache_key');
+            const cachedText = localStorage.getItem('lexicon_data');
+            const cachedFingerprint = localStorage.getItem('lexicon_fp');
 
-            // Download from network (CDN will never serve stale thanks to _headers)
+            // Download from network with force-cache to use Cloudflare edge cache
+            // The Cloudflare Cache Rule ensures edge TTL=120s, browser TTL=0s
             console.log('📥 Downloading lexicon...');
-            const response = await fetch('words.json');
+            const response = await fetch('words.json', { cache: 'force-cache' });
 
             if (!response.ok) {
                 throw new Error(`Failed to load lexicon: ${response.status}`);
@@ -56,19 +57,24 @@ class LexiconLoader {
             const blob = new Blob(chunks);
             const text = await blob.text();
 
-            // Generate cache key from first 100 chars (acts as simple hash/fingerprint)
-            const cacheKey = text.substring(0, 100);
+            // Generate SHA-256 fingerprint using Web Crypto API
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            // Convert to 16-character hex string (first 64 bits)
+            const fingerprint = hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
 
             // If cache matches, use it; otherwise update cache
-            if (cachedKey === cacheKey && cachedText) {
+            if (cachedFingerprint === fingerprint && cachedText) {
                 console.log('📖 Using cached lexicon (content unchanged)');
                 this.words = JSON.parse(cachedText);
             } else {
                 console.log('💾 Caching new lexicon version');
                 this.words = JSON.parse(text);
                 try {
-                    localStorage.setItem('lexicon_cache', text);
-                    localStorage.setItem('lexicon_cache_key', cacheKey);
+                    localStorage.setItem('lexicon_data', text);
+                    localStorage.setItem('lexicon_fp', fingerprint);
                 } catch (e) {
                     console.warn('Failed to cache lexicon:', e);
                 }

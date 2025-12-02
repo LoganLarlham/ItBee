@@ -68,6 +68,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             e.stopPropagation();
             console.log('New random game clicked');
+
+            // Track game reset event (Umami Analytics)
+            if (typeof umami !== 'undefined') {
+                umami.track('game_reset', { previous_type: game.gameType });
+            }
+
             // Close modal first
             if (settingsModal) {
                 settingsModal.classList.remove('active');
@@ -103,6 +109,15 @@ window.addEventListener('DOMContentLoaded', async () => {
         showWordsBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+
+            // Track give up event (Umami Analytics)
+            if (typeof umami !== 'undefined') {
+                umami.track('give_up', {
+                    progress_pct: Math.round((game.score / game.totalPoints) * 100),
+                    words_found: game.foundWords.size
+                });
+            }
+
             console.log('Show words clicked');
             game.showAllWords();
         });
@@ -203,6 +218,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (languageSelect) {
         languageSelect.value = currentLang;
         languageSelect.addEventListener('change', () => {
+            // Track language change (Umami Analytics)
+            if (typeof umami !== 'undefined') {
+                umami.track('language_changed', { language: languageSelect.value });
+            }
+
             setLanguage(languageSelect.value);
         });
     }
